@@ -11,7 +11,7 @@ wheels = [
 ]
 
 [[package]]
-name = "efficia-final"
+name = "efficia"
 version = "0.1.0"
 source = { virtual = "." }
 dependencies = [

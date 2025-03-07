@@ -20,6 +20,12 @@ from .constants import ICON_LISTDIR, ICON_DIR, SEARCH_BAR_ADDRESS
 from .fileinfo import FileInfo
 from .utils import cached, try_default, debug
 
+from ctypes import windll
+user32 = windll.user32
+user32.SetProcessDPIAware()
+full_screen_rect = (0, 0, user32.GetSystemMetrics(0), user32.GetSystemMetrics(1))
+logger.info(f"SCREEN_RECT: {full_screen_rect}")
+
 class SleepError(Exception): ...
 
 class App:
@@ -56,6 +62,11 @@ class App:
         ms: List[Tuple[str, str]] = win32api.GetFileVersionInfo(self.exe_full_path, '\\VarFileInfo\\Translation')
         language, code_page = ms[0]
         return language, code_page
+    
+    @property
+    @try_default(default_value=None)
+    def isfullscreen(self) -> bool:
+        return win32gui.GetWindowRect(self.hwnd) == full_screen_rect
         
     @classmethod
     def from_active_window(cls) -> "App":
@@ -93,6 +104,11 @@ class App:
             return f" {self.title} | {self.url}"
         return f"{self.title}"
     
+    def get_entry_id(self, url: Optional[str] = None) -> str:
+        if url:
+            return f" {self.title} | {url}"
+        return f"{self.title}"
+    
     @property
     @cached
     def app_id(self) -> str:
@@ -101,6 +117,7 @@ class App:
         return f"{self.fileinfo.CompanyName} | {self.fileinfo.ProductName}"
     
     @property
+    @cached
     def title(self) -> str: 
         if self.is_chromium_based_browser:
             result = win32gui.GetWindowText(self.hwnd)
