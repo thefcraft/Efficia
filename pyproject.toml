@@ -1,0 +1,19 @@
+[project]
+name = "efficia"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "logging>=0.4.9.6",
+    "pillow>=11.1.0",
+    "psutil>=7.0.0",
+    "pywinauto>=0.6.9",
+]
+
+[tool.uv]
+dev-dependencies = [
+    "mypy>=1.15.0",
+    "types-psutil>=7.0.0.20250218",
+    "types-pywin32>=308.0.0.20250128",
+]
