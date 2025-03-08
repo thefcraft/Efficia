@@ -119,6 +119,8 @@ class IBaseUrl(TypedDict):
     baseURL: str # Primary Key
     Title: Optional[str]
     Description: Optional[str]
+    is_fetched: bool                        # after migration `first_updating_url`
+    icon_url: Optional[str]                 # after migration `first_updating_url`
 class IFetchBaseUrl(IBaseUrl):
     Timestamp: datetime
 
@@ -129,6 +131,8 @@ def create_base_url(cursor: Cursor):
         baseURL TEXT PRIMARY KEY,
         Title TEXT,
         Description TEXT,
+        is_fetched BOOLEAN DEFAULT FALSE,   -- after migration `first_updating_url`
+        icon_url TEXT,                      -- after migration `first_updating_url`
         Timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
     )
     """)    

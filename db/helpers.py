@@ -4,6 +4,9 @@ import os
 import shutil
 import logging
 from .constants import loglevel
+from typing import TypedDict, Optional
+import requests
+from bs4 import BeautifulSoup
 
 def get_baseurl(url: str) -> str:
     url = url.removeprefix('http://').removeprefix('https://')
@@ -19,6 +22,67 @@ def get_baseurl(url: str) -> str:
         default=None
     )
     return url[:pos]
+
+class UrlInfo(TypedDict):
+    title: Optional[str]
+    description: Optional[str]
+    favicon_url: str # maybe invalid...
+def get_url_info(url: str) -> UrlInfo:
+    # TODO: use playwright's firefox.launch(headless=True) as some site render everything through js :-( ;for example chat.openai.com
+    # as url is a baseurl we have to add back protocol...
+    # Notice: it may raises error if url is not valid (url is any random str)
+    if not url.startswith('https://') or url.startswith('http://'):
+        url = f'https://{url}'
+    try:
+        response = requests.get(url)
+    except requests.exceptions.SSLError:
+        url = f"http://{url.removeprefix('https://')}"
+        response = requests.get(url)
+
+    soup = BeautifulSoup(response.text, 'html.parser')
+    
+    # Extract icon from meta tags
+    favicon_url = f"{url}/favicon.ico"
+    icon_link = soup.find("link", rel="icon") # Look for <link rel="icon"> in the HTML
+    if icon_link and icon_link.get("href"): 
+        favicon_url = icon_link["href"]
+        if not favicon_url.startswith('http://') and not favicon_url.startswith('https://'): 
+            favicon_url = f"{url}/{favicon_url}" # If the favicon URL is relative, make it absolute
+            
+    # Extract description from meta tags
+    description: Optional[str] = None
+    description_tag = soup.find('meta', attrs={'name': 'description'})
+    if description_tag and description_tag.get('content'):
+        description = description_tag.get('content')
+    else:
+        # Try OpenGraph description as a fallback
+        og_description = soup.find('meta', attrs={'property': 'og:description'})
+        if og_description and og_description.get('content'):
+            description = og_description.get('content')
+        else:
+            twitter_description = soup.find('meta', attrs={'property': 'twitter:description'})
+            if twitter_description and twitter_description.get('content'):
+                description = twitter_description.get('content')
+    
+    # Extract title from meta tags
+    title: Optional[str] = None
+    if soup.title:
+        title = soup.title.string
+    else:
+        # Try OpenGraph description as a fallback
+        og_title = soup.find('meta', attrs={'property': 'og:title'})
+        if og_title and og_title.get('content'):
+            title = og_title.get('content')
+        else:
+            twitter_title = soup.find('meta', attrs={'property': 'twitter:title'})
+            if twitter_title and twitter_title.get('content'):
+                title = twitter_title.get('content')
+    
+    return UrlInfo(
+        title=title,
+        description=description,
+        favicon_url=favicon_url
+    )
 
 class Path(str):
     """

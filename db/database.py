@@ -3,12 +3,13 @@ from typing import Optional
 from .models import IActivityEntry, IApp, IBaseUrl, IUrl
 from .models import IFetchActivityEntry, IFetchApp, IFetchBaseUrl, IFetchUrl
 from .models import create_activity, create_app, create_base_url, create_url
-from .helpers import get_baseurl, logger
+from .helpers import get_baseurl, logger, get_url_info
 
 class DataBase:
     def __init__(self, db_path: str):
         # Connect to SQLite database
         self.conn = sqlite3.connect(db_path)
+        self.conn.row_factory = sqlite3.Row # Set row_factory to sqlite3.Row so that results are returned as dictionaries
         self.cursor = self.conn.cursor()
         self.create_table()
         
@@ -25,19 +26,51 @@ class DataBase:
         self.conn.commit()
     
     def insert_baseurl(self, baseurl: IBaseUrl, commit: bool = True) -> None:
+        # Check if URL exists and whether it's fetched or not
         self.cursor.execute("""--sql
-        INSERT OR IGNORE INTO BaseURLs (
-            baseURL, Title, Description
-        ) VALUES (?, ?, ?)
+        SELECT 
+            baseURL, Title, Description, is_fetched, icon_url, Timestamp
+        FROM BaseURLs WHERE baseURL = ?
         """, (
-           baseurl['baseURL'], baseurl.get('Title'), baseurl.get('Description')
+            baseurl['baseURL'],
         ))
-        if commit: self.conn.commit()
+        existing_url: IFetchBaseUrl = self.cursor.fetchone()
+        
+        title: Optional[str] = None
+        desc: Optional[str] = None
+        favicon: Optional[str] = None
+        # feching info
+        if not existing_url or (existing_url and not existing_url['is_fetched']):
+            try:
+                urlinfo = get_url_info(url=baseurl['baseURL'])
+                title = urlinfo['title']
+                desc = urlinfo['description']
+                favicon = urlinfo['favicon_url']
+            except Exception as e:
+                logger.error(f"Error while Feching url info for {baseurl['baseURL']} ERROR: {e}")
+                
+        if existing_url is None:
+            self.cursor.execute("""--sql
+            INSERT INTO BaseURLs (
+                baseURL, Title, Description, is_fetched, icon_url
+            ) VALUES (?, ?, ?, ?, ?)
+            """, (
+               baseurl['baseURL'], title, desc, True, favicon
+            ))
+        elif existing_url and not existing_url['is_fetched']:
+            self.cursor.execute("""--sql
+            REPLACE INTO BaseURLs (
+                baseURL, Title, Description, is_fetched, icon_url
+            ) VALUES (?, ?, ?, ?, ?)
+            """, (
+               baseurl['baseURL'], title, desc, True, favicon
+            ))
+            if commit: self.conn.commit()
     
     def insert_url(self, url: IUrl, commit: bool = True) -> None:
         baseurl = get_baseurl(url['URL'])
         # if not baseurl: ... # TODO maybe just return for anyrandom string the url is None
-        self.insert_baseurl(IBaseUrl(baseURL=baseurl, Title=None, Description=None), commit=False)
+        self.insert_baseurl(IBaseUrl(baseURL=baseurl, Title=None, Description=None, is_fetched=False, time_fetched=None, icon_url=None), commit=False)
         self.cursor.execute("""--sql
         INSERT OR IGNORE INTO URLs (
             URL, baseURL
