@@ -90,11 +90,14 @@ class App:
     
     @property
     def is_chromium_based_browser(self) -> bool:
+        # TODO: update names of browser like for different versions...
+        # TODO: also add other versions of browser too with updated serarch bar_address
         if not self: return False
         return self.app_id in (
             "Microsoft Corporation | Microsoft Edge", 
             "Brave Software, Inc. | Brave Browser", 
-            "Google LLC | Google Chrome"
+            "Google LLC | Google Chrome",
+            "Mozilla Corporation | Nightly"
         )
     
     @property
@@ -151,6 +154,8 @@ class App:
                 logger.warning(f"Could not find URL for {self.app_id}")
         
         if not url: return None
+        if url.find(' ') != -1: return None # space must not be in the url
+        # if url.find('.') == -1: return None # . or must be present in the url like .com etc; Note: this is not handled for localhost
         # url, title = result
         self.last_url = url
         return url
@@ -256,7 +261,7 @@ class App:
                 json.dump(debug_info, f, indent=4)
             
         return debug_info
-    
+    # TODO: also add auto_id in the address...
     # @debug
     def get_ui_element_value_by_address_and_title(self, address: List[Tuple[str, str, str, int]], take_first_windos: bool = False) -> Optional[str]:
         """

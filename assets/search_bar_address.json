@@ -292,5 +292,27 @@
                 4
             ]
         ]
+    ],
+    "Mozilla Corporation | Nightly": [
+        [
+            [
+                "",
+                "ToolBar",
+                "Navigation",
+                4
+            ],
+            [
+                "",
+                "ComboBox",
+                "",
+                6
+            ],
+            [
+                "",
+                "Edit",
+                "Search or enter address",
+                0
+            ]
+        ]
     ]
 }
