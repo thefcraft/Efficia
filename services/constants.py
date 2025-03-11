@@ -20,6 +20,11 @@ ICON_DIR: Path = modulepath.joinpath("instance", "icons")
 if not ICON_DIR.exists(): ICON_DIR.mkdir(parents=True, exist_ok=True)
 ICON_LISTDIR = ICON_DIR.listdir()
 
-assert modulepath.joinpath("instance", "search_bar_address.json").exists(), "Please copy paste this file from assets."
-with open (modulepath.joinpath("instance", "search_bar_address.json"), "r") as f:
-    SEARCH_BAR_ADDRESS = json.load(f)
+if not modulepath.joinpath("instance", "search_bar_address.json").exists():
+    with open (modulepath.joinpath("..", 'assets', "search_bar_address.json"), "r") as f:
+        SEARCH_BAR_ADDRESS = json.load(f)
+    with open (modulepath.joinpath("instance", "search_bar_address.json"), "w") as f:
+        json.dump(SEARCH_BAR_ADDRESS, f)
+else:
+    with open (modulepath.joinpath("instance", "search_bar_address.json"), "r") as f:
+        SEARCH_BAR_ADDRESS = json.load(f)

@@ -14,7 +14,7 @@ def undo_migration(conn: sqlite3.Connection) -> bool:
         cursor.execute("PRAGMA foreign_keys=off;")  # Disable foreign key enforcement
         
         # Create the old BaseURLs table (same schema as before the migration)
-        cursor.execute("""
+        cursor.execute("""--sql
         CREATE TABLE IF NOT EXISTS BaseURLs_old (
             baseURL TEXT PRIMARY KEY,
             Title TEXT,
@@ -24,7 +24,7 @@ def undo_migration(conn: sqlite3.Connection) -> bool:
         """)
         
         # Copy the data from the new table to the old one
-        cursor.execute("""
+        cursor.execute("""--sql
         INSERT INTO BaseURLs_old (baseURL, Title, Description, Timestamp)
         SELECT baseURL, Title, Description, Timestamp FROM BaseURLs;
         """)
@@ -64,7 +64,7 @@ def migrate_database(conn: sqlite3.Connection) -> bool:
         cursor.execute("ALTER TABLE BaseURLs RENAME TO BaseURLs_old;")
         
         # Create the new BaseURLs table with the new columns
-        cursor.execute("""
+        cursor.execute("""--sql
         CREATE TABLE IF NOT EXISTS BaseURLs (
             baseURL TEXT PRIMARY KEY,
             Title TEXT,
@@ -76,7 +76,7 @@ def migrate_database(conn: sqlite3.Connection) -> bool:
         """)
         
         # Copy the data from the old table to the new one
-        cursor.execute("""
+        cursor.execute("""--sql
         INSERT INTO BaseURLs (baseURL, Title, Description, Timestamp)
         SELECT baseURL, Title, Description, Timestamp FROM BaseURLs_old;
         """)

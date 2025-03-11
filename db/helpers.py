@@ -4,9 +4,32 @@ import os
 import shutil
 import logging
 from .constants import loglevel
-from typing import TypedDict, Optional
+from typing import TypedDict, Optional, List, Literal, Dict, NewType
 import requests
 from bs4 import BeautifulSoup
+
+def encode_weekdays(weekdays: List[Literal['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday']]):
+    # mapping of weekdays to their binary positions (0 to 6)
+    day_map: Dict[Literal['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'], Literal[0, 1, 2, 3, 4, 5, 6]] = {
+        'sunday': 0,
+        'monday': 1,
+        'tuesday': 2,
+        'wednesday': 3,
+        'thursday': 4,
+        'friday': 5,
+        'saturday': 6
+    }
+    
+    # Initialize the binary number as 0
+    binary_number = 0
+    
+    # Set the corresponding bits to 1 for the given weekdays
+    for day in weekdays:
+        if day in day_map:
+            # Using bitwise OR to set the bit at the correct position to 1
+            binary_number |= (1 << day_map[day])
+    
+    return binary_number
 
 def get_baseurl(url: str) -> str:
     url = url.removeprefix('http://').removeprefix('https://')

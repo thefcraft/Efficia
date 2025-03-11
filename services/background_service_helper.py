@@ -89,7 +89,7 @@ class App:
         return os.path.basename(dirname)
     
     @property
-    def is_chromium_based_browser(self) -> bool:
+    def is_browser(self) -> bool:
         # TODO: update names of browser like for different versions...
         # TODO: also add other versions of browser too with updated serarch bar_address
         if not self: return False
@@ -122,7 +122,7 @@ class App:
     @property
     @cached
     def title(self) -> str: 
-        if self.is_chromium_based_browser:
+        if self.is_browser:
             result = win32gui.GetWindowText(self.hwnd)
             if not result:
                 current_app = Application(backend='uia').connect(handle=self.hwnd)
@@ -138,7 +138,7 @@ class App:
     @cached
     @try_default(default_value=None)
     def url(self) -> Optional[str]:
-        if not self.is_chromium_based_browser: 
+        if not self.is_browser: 
             self.last_url = None
             return None
         
@@ -335,7 +335,7 @@ class App:
             AppId= self.app_id,
             ExeFileName= self.exe_file_name,
             ExeDirName= self.exe_dir_name,
-            IsChromiumBased= self.is_chromium_based_browser,
+            IsBrowser= self.is_browser,
             CompanyName= self.fileinfo.CompanyName if self.fileinfo else None,
             ProductName= self.fileinfo.ProductName if self.fileinfo else None,
             FileVersion= self.fileinfo.FileVersion if self.fileinfo else None,
@@ -347,5 +347,7 @@ class App:
             OriginalFilename= self.fileinfo.OriginalFilename if self.fileinfo else None,
             Comments= self.fileinfo.Comments if self.fileinfo else None,
             PrivateBuild= self.fileinfo.PrivateBuild if self.fileinfo else None,
-            SpecialBuild= self.fileinfo.SpecialBuild if self.fileinfo else None
+            SpecialBuild= self.fileinfo.SpecialBuild if self.fileinfo else None,
+            BlockId=None,
+            Category=None
         )

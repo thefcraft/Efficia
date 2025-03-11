@@ -6,7 +6,7 @@ import time
 from typing import Optional
 
 def modify_iEntry(iEntry: IActivityEntry, active: bool, idleDuration: int, entry_duration: int) -> IActivityEntry:
-    iEntry["IsActive"] = active
+    iEntry["IsActive"] = active # TODO:? Remove isActive from this as it should be same as last activity 
     iEntry['IdleDuration'] = idleDuration
     iEntry["Duration"] = entry_duration
     return iEntry
@@ -31,7 +31,7 @@ def service(database: DataBase):
             new_active = new_idle_duration <= INACTIVITY_LIMIT
         
             full_screen_entry_id: Optional[str] = None
-            if not new_app.url and new_app.is_chromium_based_browser and new_app.isfullscreen: # new_app.url @cached
+            if not new_app.url and new_app.is_browser and new_app.isfullscreen: # new_app.url @cached
                 full_screen_entry_id = new_app.get_entry_id(old_app.url)
             
         except SleepError as e:
