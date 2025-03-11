@@ -291,6 +291,62 @@
                 "Address and search bar",
                 4
             ]
+        ],
+        [
+            [
+                "BrowserRootView",
+                "Pane",
+                "",
+                1
+            ],
+            [
+                "NonClientView",
+                "Pane",
+                "",
+                0
+            ],
+            [
+                "BrowserFrameViewWin",
+                "Pane",
+                "",
+                0
+            ],
+            [
+                "BrowserView",
+                "Pane",
+                "",
+                1
+            ],
+            [
+                "TopContainerView",
+                "Pane",
+                "",
+                0
+            ],
+            [
+                "ToolbarView",
+                "ToolBar",
+                "",
+                1
+            ],
+            [
+                "ToolbarView::ContainerView",
+                "Pane",
+                "",
+                2
+            ],
+            [
+                "LocationBarView",
+                "Group",
+                "",
+                3
+            ],
+            [
+                "OmniboxViewViews",
+                "Edit",
+                "Address and search bar",
+                1
+            ]
         ]
     ],
     "Mozilla Corporation | Nightly": [
