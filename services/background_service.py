@@ -5,8 +5,7 @@ from .constants import INTERVAL, INACTIVITY_LIMIT, SAVE_EVERY
 import time
 from typing import Optional
 
-def modify_iEntry(iEntry: IActivityEntry, active: bool, idleDuration: int, entry_duration: int) -> IActivityEntry:
-    iEntry["IsActive"] = active # TODO:? Remove isActive from this as it should be same as last activity 
+def modify_iEntry(iEntry: IActivityEntry, idleDuration: int, entry_duration: int) -> IActivityEntry:
     iEntry['IdleDuration'] = idleDuration
     iEntry["Duration"] = entry_duration
     return iEntry
@@ -49,7 +48,7 @@ def service(database: DataBase):
                     if time_since_update > SAVE_EVERY:
                         last_activity_index = database.update_or_insert_activity(
                             activity=modify_iEntry(iEntry=old_app_iEntry,
-                                active=old_active, idleDuration=old_idle_duration, entry_duration=entry_duration + INTERVAL
+                                idleDuration=old_idle_duration, entry_duration=entry_duration + INTERVAL
                             ), 
                             EntryId=last_activity_index,
                             commit=True # NOTE: SAVE_EVERY
@@ -64,7 +63,7 @@ def service(database: DataBase):
                     logger.debug(f"SAME APP AND WINDOW BUT DIFFERENT ACTIVE STATE, new state: {not old_active}")
                     database.update_or_insert_activity(
                         activity=modify_iEntry(iEntry=old_app_iEntry,
-                            active=old_active, idleDuration=old_idle_duration, entry_duration=entry_duration + INTERVAL
+                            idleDuration=old_idle_duration, entry_duration=entry_duration + INTERVAL
                         ), 
                         EntryId=last_activity_index,
                         commit=False
@@ -80,7 +79,7 @@ def service(database: DataBase):
                 logger.debug(f"SAME APP BUT DIFFERENT WINDOW: {new_app}")
                 database.update_or_insert_activity(
                     activity=modify_iEntry(iEntry=old_app_iEntry,
-                        active=old_active, idleDuration=old_idle_duration, entry_duration=entry_duration + INTERVAL
+                        idleDuration=old_idle_duration, entry_duration=entry_duration + INTERVAL
                     ), 
                     EntryId=last_activity_index,
                     commit=False
@@ -98,7 +97,7 @@ def service(database: DataBase):
             logger.debug(f"CHANGED TO NEW APP: {new_app}")
             database.update_or_insert_activity(
                 activity=modify_iEntry(iEntry=old_app_iEntry,
-                    active=old_active, idleDuration=old_idle_duration, entry_duration=entry_duration + INTERVAL
+                    idleDuration=old_idle_duration, entry_duration=entry_duration + INTERVAL
                 ), 
                 EntryId=last_activity_index,
                 commit=False

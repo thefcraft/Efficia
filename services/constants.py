@@ -15,16 +15,16 @@ import json
 INACTIVITY_LIMIT: int = 60*2
 INTERVAL: int = 2
 SAVE_EVERY: int = 60*5
-ICON_DIR: Path = modulepath.joinpath("instance", "icons")
+ICON_DIR: Path = modulepath.joinpath('..', "instance", "icons")
 
 if not ICON_DIR.exists(): ICON_DIR.mkdir(parents=True, exist_ok=True)
 ICON_LISTDIR = ICON_DIR.listdir()
 
-if not modulepath.joinpath("instance", "search_bar_address.json").exists():
+if not modulepath.joinpath('..', "instance", "search_bar_address.json").exists():
     with open (modulepath.joinpath("..", 'assets', "search_bar_address.json"), "r") as f:
         SEARCH_BAR_ADDRESS = json.load(f)
-    with open (modulepath.joinpath("instance", "search_bar_address.json"), "w") as f:
+    with open (modulepath.joinpath('..', "instance", "search_bar_address.json"), "w") as f:
         json.dump(SEARCH_BAR_ADDRESS, f)
 else:
-    with open (modulepath.joinpath("instance", "search_bar_address.json"), "r") as f:
+    with open (modulepath.joinpath('..', "instance", "search_bar_address.json"), "r") as f:
         SEARCH_BAR_ADDRESS = json.load(f)

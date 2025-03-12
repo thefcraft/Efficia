@@ -1,6 +1,6 @@
 from functools import wraps
 from typing import TypeVar, Callable, Union
-from datetime import datetime
+from datetime import datetime, timezone
 from db import logger
 
 U = TypeVar('U')
@@ -43,7 +43,7 @@ def try_default(default_value: V) -> Callable[[Callable[..., U]], Callable[..., 
     return decorator
 
 def get_current_date()->str:
-    return datetime.now().strftime('%Y-%m-%d')
+    return datetime.now(timezone.utc).strftime('%Y-%m-%d')
 
 def get_current_timestamp()->str:
-    return datetime.now().strftime('%Y-%m-%d %I:%M:%S %p')
+    return datetime.now(timezone.utc).strftime('%Y-%m-%d %I:%M:%S %p')

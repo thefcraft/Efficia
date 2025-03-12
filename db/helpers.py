@@ -255,6 +255,7 @@ class Path(str):
         Raises:
             OSError: If the path is a directory and it is not empty.
         """
+        if not self.exists(): return
         if self.is_dir():
             os.rmdir(self)
         else:
@@ -262,15 +263,15 @@ class Path(str):
 
 modulepath = Path(os.path.dirname(__file__))
 
-if not modulepath.joinpath('instance').exists(): 
-    modulepath.joinpath('instance').mkdir()
+if not modulepath.joinpath('..', 'instance').exists(): 
+    modulepath.joinpath('..', 'instance').mkdir()
     
 # Set up logging
 logging.basicConfig(
     level=loglevel,
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
     handlers=[
-        logging.FileHandler(modulepath.joinpath("instance", "database.log")),
+        logging.FileHandler(modulepath.joinpath('..', "instance", "database.log")),
         logging.StreamHandler()
     ],
     encoding='utf-8'  # This specifies UTF-8 encoding

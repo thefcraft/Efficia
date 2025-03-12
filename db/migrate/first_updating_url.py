@@ -99,7 +99,7 @@ def migrate_database(conn: sqlite3.Connection) -> bool:
 if __name__ == "__main__":
     import os 
     modulepath = os.path.join(os.path.dirname(__file__), '..')
-    db_path = os.path.join(modulepath, 'instance', 'database.db')
+    db_path = os.path.join(modulepath, '..', 'instance', 'database.db')
     
     # Connect to the database
     conn = sqlite3.connect(db_path)

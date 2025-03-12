@@ -218,7 +218,7 @@ class App:
 
     @debug
     @try_default(default_value=None)
-    def get_window_gui_debug_info(self, file_name = modulepath.joinpath('instance', "debug_info.json")) -> dict:
+    def get_window_gui_debug_info(self, file_name = modulepath.joinpath('..', 'instance', "debug_info.json")) -> dict:
         """
         Retrieves a complete tree of UI elements from the window and returns a dictionary
         snapshot. Each element is assigned a unique 'address' that is simply a list of indices

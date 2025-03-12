@@ -10,8 +10,10 @@ wheels/
 
 # Virtual environments
 .venv
-
+instance
 
 # MINE
 readme.me.md
 .vscode
+.temp
+debug.database.db
