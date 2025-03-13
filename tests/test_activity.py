@@ -42,7 +42,7 @@ class TestActivity(TestCase):
         database.update_or_insert_activity(
             activity=modify_iEntry(
                 iEntry=iEntry,
-                # active=False, # TODO: Remove this in the modify activity as if this changes then the activity should be changed too
+                active=False,
                 idleDuration=7.64,
                 entry_duration=246
             ), 

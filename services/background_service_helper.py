@@ -115,7 +115,7 @@ class App:
     @property
     @cached
     def app_id(self) -> str:
-        if not self.fileinfo or not self.fileinfo.CompanyName or not self.fileinfo.ProductName:
+        if not self.fileinfo or not self.fileinfo.CompanyName or self.fileinfo.CompanyName == 'None' or not self.fileinfo.ProductName or self.fileinfo.ProductName == 'None':
             return f"{self.exe_dir_name} | {self.exe_file_name}"
         return f"{self.fileinfo.CompanyName} | {self.fileinfo.ProductName}"
     

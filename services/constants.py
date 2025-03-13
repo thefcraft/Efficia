@@ -13,7 +13,8 @@ import json
 #                                   Constants                                       #
 #####################################################################################
 INACTIVITY_LIMIT: int = 60*2
-INTERVAL: int = 2
+INTERVAL: int = 5
+# MIN_DURATION_TO_SAVE: int = 10
 SAVE_EVERY: int = 60*5
 ICON_DIR: Path = modulepath.joinpath('..', "instance", "icons")
 
@@ -28,3 +29,5 @@ if not modulepath.joinpath('..', "instance", "search_bar_address.json").exists()
 else:
     with open (modulepath.joinpath('..', "instance", "search_bar_address.json"), "r") as f:
         SEARCH_BAR_ADDRESS = json.load(f)
+        
+# assert MIN_DURATION_TO_SAVE < SAVE_EVERY, "HEY MIN_DURATION_TO_SAVE is not less than SAVE_EVERY"

@@ -1,14 +1,19 @@
 from db import get_database, DataBase, logger
 from db.models import IUrl, IApp, IActivityEntry
 from .background_service_helper import App, SleepError
-from .constants import INTERVAL, INACTIVITY_LIMIT, SAVE_EVERY
+from .constants import INTERVAL, INACTIVITY_LIMIT, SAVE_EVERY#, MIN_DURATION_TO_SAVE
 import time
 from typing import Optional
 
-def modify_iEntry(iEntry: IActivityEntry, idleDuration: int, entry_duration: int) -> IActivityEntry:
+def modify_iEntry(iEntry: IActivityEntry, active: bool, idleDuration: int, entry_duration: int) -> IActivityEntry:
+    iEntry["IsActive"] = active
     iEntry['IdleDuration'] = idleDuration
     iEntry["Duration"] = entry_duration
     return iEntry
+
+# conn.execute('SAVEPOINT sp1')
+# cursor.execute('RELEASE SAVEPOINT sp1')
+# conn.execute('ROLLBACK TO SAVEPOINT sp1')
 
 def service(database: DataBase):
     old_app = App.from_active_window()
@@ -48,7 +53,7 @@ def service(database: DataBase):
                     if time_since_update > SAVE_EVERY:
                         last_activity_index = database.update_or_insert_activity(
                             activity=modify_iEntry(iEntry=old_app_iEntry,
-                                idleDuration=old_idle_duration, entry_duration=entry_duration + INTERVAL
+                                active=old_active, idleDuration=old_idle_duration, entry_duration=entry_duration + INTERVAL
                             ), 
                             EntryId=last_activity_index,
                             commit=True # NOTE: SAVE_EVERY
@@ -61,13 +66,14 @@ def service(database: DataBase):
                     time_since_update += INACTIVITY_LIMIT
                 else: # same app but old one has different active state
                     logger.debug(f"SAME APP AND WINDOW BUT DIFFERENT ACTIVE STATE, new state: {not old_active}")
-                    database.update_or_insert_activity(
-                        activity=modify_iEntry(iEntry=old_app_iEntry,
-                            idleDuration=old_idle_duration, entry_duration=entry_duration + INTERVAL
-                        ), 
-                        EntryId=last_activity_index,
-                        commit=False
-                    )
+                    if not entry_duration == 0:
+                        database.update_or_insert_activity(
+                            activity=modify_iEntry(iEntry=old_app_iEntry,
+                                active=old_active, idleDuration=old_idle_duration, entry_duration=entry_duration + INTERVAL
+                            ), 
+                            EntryId=last_activity_index,
+                            commit=False
+                        )
                     # ------------------------
                     old_active = new_active
                     old_idle_duration = new_idle_duration
@@ -77,13 +83,14 @@ def service(database: DataBase):
                     time_since_update = 0
             else: # same app but different window
                 logger.debug(f"SAME APP BUT DIFFERENT WINDOW: {new_app}")
-                database.update_or_insert_activity(
-                    activity=modify_iEntry(iEntry=old_app_iEntry,
-                        idleDuration=old_idle_duration, entry_duration=entry_duration + INTERVAL
-                    ), 
-                    EntryId=last_activity_index,
-                    commit=False
-                )
+                if not entry_duration == 0:
+                    database.update_or_insert_activity(
+                        activity=modify_iEntry(iEntry=old_app_iEntry,
+                            active=old_active, idleDuration=old_idle_duration, entry_duration=entry_duration + INTERVAL
+                        ), 
+                        EntryId=last_activity_index,
+                        commit=False
+                    )
                 # ------------------------
                 old_app = new_app
                 old_entry_id = new_entry_id
@@ -95,13 +102,14 @@ def service(database: DataBase):
                 old_app_iEntry = new_app.get_iEntry(active=new_active, idleDuration=new_idle_duration, entry_duration=entry_duration)
         else: # different app
             logger.debug(f"CHANGED TO NEW APP: {new_app}")
-            database.update_or_insert_activity(
-                activity=modify_iEntry(iEntry=old_app_iEntry,
-                    idleDuration=old_idle_duration, entry_duration=entry_duration + INTERVAL
-                ), 
-                EntryId=last_activity_index,
-                commit=False
-            )
+            if not entry_duration == 0:
+                database.update_or_insert_activity(
+                    activity=modify_iEntry(iEntry=old_app_iEntry,
+                        active=old_active, idleDuration=old_idle_duration, entry_duration=entry_duration + INTERVAL
+                    ), 
+                    EntryId=last_activity_index,
+                    commit=False
+                )
             database.insert_app(
                 app=new_app.get_iApp(), commit=False
             )
