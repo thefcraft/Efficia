@@ -44,8 +44,8 @@ class TestChat(TestCase):
             commit=False
         )
         
-        assert database.get_current_leaf_node_id(chat_id=chat_id) == message_D
-        assert database.get_current_leaf_node_id(chat_id=chat_id, message_id=message_C) == message_D
+        assert database.get_current_leaf_node_id(chat_id=chat_id, use_get_chat_info=False) == message_D
+        assert database.get_current_leaf_node_id(chat_id=chat_id, message_id=message_C, use_get_chat_info=False) == message_D
         
         try:
             database.next_message(chat_id=chat_id, message_id=message_D, return_type=None, commit=False)

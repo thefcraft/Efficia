@@ -1,6 +1,6 @@
 from typing import Optional
-from ..helpers import modulepath, Path
-from .database import DataBase
+from .helpers import modulepath, Path
+from .database import DataBase, GetMessages
 
 if not modulepath.joinpath('..', 'instance').exists(): 
     modulepath.joinpath('..', 'instance').mkdir()

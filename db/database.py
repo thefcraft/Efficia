@@ -4,6 +4,7 @@ from .models import IActivityEntry, IApp, IBaseUrl, IUrl
 from .models import IFetchActivityEntry, IFetchApp, IFetchBaseUrl, IFetchUrl
 from . import models
 from .helpers import get_baseurl, logger, get_url_info
+from ml import langchain_classification
 
 class DataBase:
     def __init__(self, db_path: str):
@@ -82,6 +83,13 @@ class DataBase:
                baseurl['baseURL'], title, desc, True, favicon
             ))
             if commit: self.conn.commit()
+        try:
+            new_url_class = langchain_classification.clssify_new_url(self.cursor, self.conn, 
+                                                                     baseURL=baseurl['baseURL'], Title=baseurl['Title'], Description=baseurl['Description'], 
+                                                                     commit=False)
+            logger.info(msg=f"Url Classification report: {new_url_class} <= {baseurl['baseURL']}")
+        except Exception as e:
+            logger.error(msg=f"Url Classification error: {e} <= {baseurl['baseURL']}")
     
     def insert_url(self, url: IUrl, commit: bool = True) -> None:
         baseurl = get_baseurl(url['URL'])
@@ -118,6 +126,13 @@ class DataBase:
             app.get('InternalName'), app.get('LegalCopyright'), app.get('LegalTrademarks'), app.get('OriginalFilename'), 
             app.get('Comments'), app.get('PrivateBuild'), app.get('SpecialBuild')
         ))
+        try:
+            new_app_class = langchain_classification.classify_new_app(self.cursor, self.conn, 
+                                                                  app, 
+                                                                  commit=False)
+            logger.info(msg=f"App Classification report: {new_app_class} <= {app['AppId']}")
+        except Exception as e:
+            logger.error(msg=f"App Classification error: {e} <= {app['AppId']}")
         if commit: self.conn.commit()
         
     def insert_activity(self, activity: IActivityEntry, commit: bool = True) -> int:

@@ -10,7 +10,9 @@ from datetime import datetime, time
 
 class IChat(TypedDict):
     title: Optional[str]
-    
+    leaf_node_id: Optional[int] # None
+    active_depth: int # 0
+
 class IFetchChat(IChat):
     ChatId: int
     Timestamp: datetime
@@ -20,7 +22,10 @@ def create_chat(cursor: Cursor):
     CREATE TABLE IF NOT EXISTS Chats (
         ChatId INTEGER PRIMARY KEY AUTOINCREMENT,
         title TEXT,
-        Timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
+        leaf_node_id INTEGER DEFAULT NULL,
+        active_depth INTEGER DEFAULT 0,
+        Timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (leaf_node_id) REFERENCES Messages (MessageId)
     )
     """)
     

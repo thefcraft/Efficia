@@ -4,4 +4,4 @@ import logging
 #                                   Constants                                       #
 #####################################################################################
 
-loglevel = logging.ERROR
+loglevel = logging.INFO
