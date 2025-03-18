@@ -1,6 +1,6 @@
 // Function to categorize timestamp
 export type ICategorizeTimestamp = (
-    "Yesterday" | "Previous 7 Days" | "Previous 30 Days" | "January" | "February" | "March" | "April" | "May" | "June" | "July" | 
+    "Today" | "Yesterday" | "Previous 7 Days" | "Previous 30 Days" | "January" | "February" | "March" | "April" | "May" | "June" | "July" | 
     "August" | "September" | "October" | "November" | "December" | string
 );
 export function categorizeTimestamp(timestampStr: string): string {
@@ -8,26 +8,27 @@ export function categorizeTimestamp(timestampStr: string): string {
     const timestamp = new Date(timestampStr);
 
     // Check if the timestamp is from yesterday
-    const yesterday = new Date(now);
-    yesterday.setDate(now.getDate() - 1);
+    const yesterday = new Date();
+    yesterday.setDate(yesterday.getDate() - 1);
     yesterday.setHours(0, 0, 0, 0);  // Set the time to midnight to check the entire day
-    const tomorrow = new Date(yesterday);
-    tomorrow.setDate(yesterday.getDate() + 1);  // Set to the beginning of the next day
-
-    if (timestamp >= yesterday && timestamp < tomorrow) {
-        return "Yesterday";
+    const today = new Date(yesterday);
+    today.setDate(yesterday.getDate() + 1);  // Set to the beginning of the next day
+    if (timestamp >= today) {
+        return "Today";
     }
-
+    if (timestamp >= yesterday) {
+        return "Today";
+    }
     // Check if the timestamp is within the previous 7 days
-    const sevenDaysAgo = new Date(now);
-    sevenDaysAgo.setDate(now.getDate() - 7);
-    if (timestamp >= sevenDaysAgo && timestamp <= now) {
+    const sevenDaysAgo = new Date(today);
+    sevenDaysAgo.setDate(today.getDate() - 7);
+    if (timestamp >= sevenDaysAgo) {
         return "Previous 7 Days";
     }
 
     // Check if the timestamp is within the previous 30 days
-    const thirtyDaysAgo = new Date(now);
-    thirtyDaysAgo.setDate(now.getDate() - 30);
+    const thirtyDaysAgo = new Date(today);
+    thirtyDaysAgo.setDate(today.getDate() - 30);
     if (timestamp >= thirtyDaysAgo && timestamp <= now) {
         return "Previous 30 Days";
     }

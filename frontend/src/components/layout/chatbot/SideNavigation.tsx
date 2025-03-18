@@ -12,7 +12,9 @@ import {
   Trash2,
   X,
   Check,
-  Settings
+  Settings,
+  ChevronLeft,
+  ChevronRight
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useThemeStore } from '@/stores/useThemeStore';
@@ -179,7 +181,7 @@ const ConversationItem = ({ title, to, active = false, onShare, onRename, onArch
       { (isHovered || isOpen) && (
         <div className="absolute right-4 top-1/2 -translate-y-1/2">
           <DropdownMenu onOpenChange={(open) => setIsOpen(open)}>
-            <DropdownMenuTrigger>
+            <DropdownMenuTrigger asChild>
               <Button 
                 variant="ghost" 
                 size="icon"
@@ -283,9 +285,16 @@ export function SideNavigation() {
   
   return (
     <aside className={cn(
-      "h-screen sticky top-0 border-r bg-background flex flex-col overflow-hidden transition-all duration-300 w-80 shadow-sm",
+      "h-screen top-0 border-r bg-background flex flex-col transition-all duration-300 w-80 shadow-sm relative",
       sidebarCollapsed ? "w-16" : "w-72 min-w-72 max-w-72"
     )}>
+      <div className='absolute right-0 h-full w-4 -mr-4 flex flex-row items-center opacity-0 hover:opacity-100'>
+        {sidebarCollapsed?
+          <ChevronRight className="h-4 w-4 cursor-pointer" onClick={toggleSidebar} />
+          :
+          <ChevronLeft className="h-4 w-4 cursor-pointer" onClick={toggleSidebar} />
+        }
+      </div>
       <div className="p-3 flex items-center justify-between border-b">
         <div className="flex items-center gap-2">
           <Button

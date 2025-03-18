@@ -54,7 +54,7 @@ export const Thread: FC = () => {
   // }, [composer])
   return (
     <ThreadPrimitive.Root
-      className="bg-sidebar box-border h-dvh w-full flex flex-col max-h-dvh"
+      className="bg-sidebar box-border h-dvh pl-2 w-full flex flex-col max-h-dvh"
       style={{
         ["--thread-max-width" as string]: "42rem",
       }}
