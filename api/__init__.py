@@ -47,7 +47,7 @@ def get_db():
 
 # app.mount("/static/icons", StaticFiles(directory=icons_directory), name="static")
 
-@app.get("/static/icons/{image_name}")
+@app.get("/api/static/icons/{image_name}")
 async def get_icon(image_name: str):
     image_path = modulepath.joinpath('..', 'instance', 'icons', image_name)
     if image_path.exists():
@@ -56,7 +56,7 @@ async def get_icon(image_name: str):
 
 # API Routes
 
-@app.get("/", tags=["Root"])
+@app.get("/api/", tags=["Root"])
 async def root():
     return {"message": "Welcome to Efficia API"}
 
@@ -65,7 +65,7 @@ async def root():
 #                                   App                                             #
 #####################################################################################
 
-@app.get("/apps/", tags=["Apps"], response_model=List[models.AppResponse])
+@app.get("/api/apps/", tags=["Apps"], response_model=List[models.AppResponse])
 async def get_activities(
     conn: sqlite3.Connection = Depends(get_db)
 ):
@@ -107,7 +107,7 @@ async def get_activities(
     return result
 
 
-@app.get("/apps/{id}", tags=["Apps"], response_model=models.GetAppResponse)
+@app.get("/api/apps/{id}", tags=["Apps"], response_model=models.GetAppResponse)
 async def get_activities(
     id: str,
     conn: sqlite3.Connection = Depends(get_db)
@@ -208,7 +208,7 @@ async def get_activities(
 #####################################################################################
 #                                   BaseUrl                                         #
 #####################################################################################
-@app.get("/baseUrls/", tags=["BaseUrl"], response_model=List[models.BaseUrlResponse])
+@app.get("/api/baseUrls/", tags=["BaseUrl"], response_model=List[models.BaseUrlResponse])
 async def get_activities(
     conn: sqlite3.Connection = Depends(get_db)
 ):
@@ -243,7 +243,7 @@ async def get_activities(
 #####################################################################################
 
 
-@app.get("/activity/", tags=["Activity"], response_model=List[models.GetActivity])
+@app.get("/api/activity/", tags=["Activity"], response_model=List[models.GetActivity])
 async def get_activities(
     start_date: Optional[str] = Query(None, description="Start date (YYYY-MM-DD)"),
     end_date: Optional[str] = Query(None, description="End date (YYYY-MM-DD)"),
@@ -335,7 +335,7 @@ async def get_activities(
 #####################################################################################
 
 # Create a new todo
-@app.post("/todos/", tags=["Todo"], response_model=models.Todo)
+@app.post("/api/todos/", tags=["Todo"], response_model=models.Todo)
 def create_todo(todo: models.TodoCreate, conn: sqlite3.Connection = Depends(get_db)):
     cursor = conn.cursor()
     if todo.parent_id is not None:
@@ -365,7 +365,7 @@ def create_todo(todo: models.TodoCreate, conn: sqlite3.Connection = Depends(get_
                 parent_id=todo_record['parent_id'], completed=todo_record['completed'], Timestamp=todo_record['Timestamp'])
 
 # Fetch all todos with nested structure
-@app.get("/todos/", tags=["Todo"], response_model=List[Tuple[models.Todo, List[models.Todo]]])
+@app.get("/api/todos/", tags=["Todo"], response_model=List[Tuple[models.Todo, List[models.Todo]]])
 def get_todos(conn: sqlite3.Connection = Depends(get_db)):
     cursor = conn.cursor()
     cursor.execute("SELECT * FROM Todos")
@@ -389,7 +389,7 @@ def get_todos(conn: sqlite3.Connection = Depends(get_db)):
 #                               Category                                            #
 #####################################################################################
 
-@app.get("/categories/", tags=["Category"], response_model=List[models.Category])
+@app.get("/api/categories/", tags=["Category"], response_model=List[models.Category])
 def get_categories(conn: sqlite3.Connection = Depends(get_db)):
     cursor = conn.cursor()
     cursor.execute("SELECT * FROM Categories")
@@ -426,7 +426,7 @@ def get_categories(conn: sqlite3.Connection = Depends(get_db)):
 
 
 # Create a new todo
-@app.post("/categories/", tags=["Category"], response_model=models.Category)
+@app.post("/api/categories/", tags=["Category"], response_model=models.Category)
 def create_categories(category: models.CategoryCreate, conn: sqlite3.Connection = Depends(get_db)):
     cursor = conn.cursor()
     cursor.execute("""--sql
@@ -443,7 +443,7 @@ def create_categories(category: models.CategoryCreate, conn: sqlite3.Connection 
     return models.Category(Category=category_record['Category'], BlockId=category_record['BlockId'], Timestamp=category_record['Timestamp'])
 
 
-@app.post("/categories/app", tags=["Category"], response_model=Optional[models.Category])
+@app.post("/api/categories/app", tags=["Category"], response_model=Optional[models.Category])
 def update_app_category(app_category: models.AppCategory, conn: sqlite3.Connection = Depends(get_db)):
     cursor = conn.cursor()
     if not app_category.Category:

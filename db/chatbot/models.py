@@ -9,7 +9,7 @@ from datetime import datetime, time
 #####################################################################################
 
 class IChat(TypedDict):
-    title: Optional[str]
+    title: str
     leaf_node_id: Optional[int] # None
     active_depth: int # 0
 
@@ -21,7 +21,7 @@ def create_chat(cursor: Cursor):
     cursor.execute("""--sql
     CREATE TABLE IF NOT EXISTS Chats (
         ChatId INTEGER PRIMARY KEY AUTOINCREMENT,
-        title TEXT,
+        title TEXT NOT NULL,
         leaf_node_id INTEGER DEFAULT NULL,
         active_depth INTEGER DEFAULT 0,
         Timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,

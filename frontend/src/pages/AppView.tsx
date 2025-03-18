@@ -21,6 +21,7 @@ import {
   XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer 
 } from 'recharts';
 import api, { AppResponse, Category, GetAppResponse } from '@/lib/api';
+import { API_BASE_URL } from '@/lib/constants';
 
 // App interface based on the provided database schema
 interface App {
@@ -203,7 +204,7 @@ const AppView = () => {
           exeFileName: data.app.ExeFileName,
           exeDirName: data.app.ExeDirName,
           isBrowser: data.app.IsBrowser,
-          icon: `http://localhost:8000/static/icons/${data.app.ICON}`, // Add exeIcon if needed
+          icon: `${API_BASE_URL}/static/icons/${data.app.ICON}`, // Add exeIcon if needed
           companyName: data.app.CompanyName,
           productName: data.app.ProductName,
           fileVersion: data.app.FileVersion,
@@ -218,7 +219,7 @@ const AppView = () => {
           exeFileName: data.app.ExeFileName,
           exeDirName: data.app.ExeDirName,
           isBrowser: data.app.IsBrowser,
-          icon: `http://localhost:8000/static/icons/${data.app.ICON}`, // Add exeIcon if needed
+          icon: `${API_BASE_URL}/static/icons/${data.app.ICON}`, // Add exeIcon if needed
           companyName: data.app.CompanyName,
           productName: data.app.ProductName,
           fileVersion: data.app.FileVersion,

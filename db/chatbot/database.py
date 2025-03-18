@@ -26,7 +26,7 @@ class DataBase:
         # Commit initial table creation
         self.conn.commit()
     
-    def new_chat(self, title: Optional[str] = None, commit: bool = True) -> int:
+    def new_chat(self, title: str, commit: bool = True) -> int:
         chat = models.IChat(title=title, leaf_node_id=None, active_depth=0)
         self.cursor.execute("""--sql
             INSERT INTO Chats (
@@ -38,6 +38,15 @@ class DataBase:
         if commit: self.conn.commit()
         assert self.cursor.lastrowid is not None, "Something went wrong..."
         return self.cursor.lastrowid
+    def update_chat_title(self, chat_id: int, title: str, commit: bool = True):
+        self.cursor.execute("""--sql
+            UPDATE Chats
+            SET title = ?
+            WHERE ChatId = ?
+        """, (
+           title, chat_id
+        ))
+        if commit: self.conn.commit() 
     
     def new_message(self, chat_id: int, content: str, message_by: Literal['USER', 'SYSTEM', 'AI'], parent_message_id: Optional[int] = None,
                     message_model: Literal[None, 'GPT4', 'LLAMA3'] = None, commit: bool = True) -> int:
@@ -434,3 +443,11 @@ class DataBase:
         ))
         messages = self.cursor.fetchall()
         return messages
+    
+    def get_all_chats(self) -> List[models.IFetchChat]:
+        self.cursor.execute("""--sql                    
+            SELECT ChatId, title, leaf_node_id, active_depth, Timestamp
+            FROM Chats
+        """, ())
+        chats = self.cursor.fetchall()
+        return chats

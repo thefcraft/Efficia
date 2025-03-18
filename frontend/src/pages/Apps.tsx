@@ -10,6 +10,7 @@ import { Search, Filter, ArrowUpDown, ExternalLink } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { toast } from "@/hooks/use-toast";
 import api, { AppResponse, Category } from '@/lib/api';
+import { API_BASE_URL } from '@/lib/constants';
 
 // App interface based on the provided database schema
 interface App {
@@ -127,7 +128,7 @@ const Apps = () => {
           exeFileName: item.ExeFileName,
           exeDirName: item.ExeDirName,
           isBrowser: item.IsBrowser,
-          icon: `http://localhost:8000/static/icons/${item.ICON}`, // Add exeIcon if needed
+          icon: `${API_BASE_URL}/static/icons/${item.ICON}`, // Add exeIcon if needed
           companyName: item.CompanyName,
           productName: item.ProductName,
           fileVersion: item.FileVersion,

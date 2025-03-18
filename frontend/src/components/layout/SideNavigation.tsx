@@ -186,7 +186,7 @@ export function SideNavigation() {
         <div className={cn("flex flex-col", sidebarCollapsed ? "space-y-4" : "space-y-1")}>
           <NavItem icon={FileText} label="Notes" to="/notes" collapsed={sidebarCollapsed} />
           <NavItem icon={Bell} label="Alarms & Timers" to="/timers" collapsed={sidebarCollapsed} />
-          <NavItem icon={Brain} label="AI Assistant" to="/ai-assistant" collapsed={sidebarCollapsed} />
+          <NavItem icon={Brain} label="AI Assistant" to="/chat" collapsed={sidebarCollapsed} />
         </div>
       </nav>
       

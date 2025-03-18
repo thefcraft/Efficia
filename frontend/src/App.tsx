@@ -18,14 +18,17 @@ import Settings from "./pages/Settings";
 import Timeline from "./pages/Timeline";
 import Analytics from "./pages/Analytics";
 import ActivityHistory from "./pages/ActivityHistory";
-import AIAssistant from "./pages/AIAssistant";
-import AIChat from "./pages/AIChat";
+// import AIAssistant from "./pages/AIAssistant";
+// import AIChat from "./pages/AIChat";
 import NotFound from "./pages/NotFound";
 import Apps from "./pages/Apps";
 import AppView from "./pages/AppView";
 import Categories from "./pages/Categories";
 import CategoryView from "./pages/CategoryView";
 import URLs from "./pages/URLs";
+import ChatBotHome from "./pages/chatbot/home";
+import ChatBotChat from "./pages/chatbot/chat";
+
 
 const queryClient = new QueryClient();
 
@@ -73,9 +76,13 @@ const App = () => {
             <Route path="/timeline" element={<Timeline />} />
             <Route path="/analytics" element={<Analytics />} />
             <Route path="/activity-history" element={<ActivityHistory />} />
-            <Route path="/ai-assistant" element={<AIAssistant />} />
-            <Route path="/chat" element={<AIChat />} />
+            {/* <Route path="/ai-assistant" element={<AIAssistant />} /> */}
+            {/* <Route path="/chat" element={<AIChat />} /> */}
             <Route path="/settings" element={<Settings />} />
+
+            <Route path="/chat" element={<ChatBotHome />} />
+            <Route path="/chat/:chatId" element={<ChatBotChat />} />
+            
             {/* Catch-all route for 404 errors */}
             <Route path="*" element={<NotFound />} />
           </Routes>

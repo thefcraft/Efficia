@@ -22,6 +22,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Badge } from '@/components/ui/badge';
 import { getCurrentDate, formatDate, formatDateWithOffset } from '@/lib/utils';
 import api, {GetActivity} from '@/lib/api';
+import { API_BASE_URL } from '@/lib/constants';
 
 // Define activity entry type
 interface ActivityEntry {
@@ -81,8 +82,8 @@ export function ActivityHistory() {
           id: `${item.activity.EntryId}`,
           appName: item.app.FileDescription || item.app.ExeDirName,
           exeName: item.app.ExeFileName,
-          exeIcon: `http://localhost:8000/static/icons/${item.app.ICON}`, // Add exeIcon if needed
-          // exeIcon: item.activity.URL_ICON!==null?`http://localhost:8000/static/icons_url/${item.activity.URL_ICON}`:`http://localhost:8000/static/icons/${item.app.ICON}`, // Add exeIcon if needed
+          exeIcon: `${API_BASE_URL}/static/icons/${item.app.ICON}`, // Add exeIcon if needed
+          // exeIcon: item.activity.URL_ICON!==null?`${API_BASE_URL}/static/icons_url/${item.activity.URL_ICON}`:`${API_BASE_URL}/static/icons/${item.app.ICON}`, // Add exeIcon if needed
           windowTitle: item.activity.Title,
           url: item.activity.URL || undefined,
           isActive: item.activity.IsActive,

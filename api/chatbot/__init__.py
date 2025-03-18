@@ -13,14 +13,17 @@ from datetime import datetime
 from typing import Optional
 
 from db.chatbot import get_database
+from db.chatbot.helpers import change_time_to_local
 from .models import BranchPickerRequest
 from .utils import formate_assistant, formate_user
+from ml.langchain_generate_title import generate_title
 
 database = get_database()
 
 os.environ["GROQ_API_KEY"] = "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"
 
-
+# TODO/BUG/ERROR: [-15] may give some error on the chats whose depth is more then 15 so i have to see the code again and coprate offset there
+# DUE TO load more feature which i am thing to add in the chats when scroll above 
 
 groq_client = AsyncOpenAI(
     base_url="https://api.groq.com/openai/v1",
@@ -145,6 +148,8 @@ async def stream_chat_response(messages: list, chat_id: str, new_chat: bool):
             yield 'e:{"finishReason":"stop","usage":{"promptTokens":null,"completionTokens":null},"isContinued":false}\n'
             yield 'd:{"finishReason":"stop","usage":{"promptTokens":null,"completionTokens":null}}\n'
             if new_chat:
+                title = await generate_title(messages[0]['content'][0]['text'])
+                database.update_chat_title(chat_id=chat_id, title=title)
                 if is_add_user_message_id == None: 
                     user_message = database.new_message(chat_id, content=formatted_messages[0]['content'], message_by='USER', commit=False)
                 else:
@@ -166,16 +171,16 @@ async def stream_chat_response(messages: list, chat_id: str, new_chat: bool):
 @app.post("/generate")
 async def generate(req: Request):
     # TODO: use messages: list for mapping edit or regenerate etc...
-    
+    # Extract the message content from the request body
+    request_data = await req.json()
+    messages = request_data.get("messages", None)
+
     chat_id = req.headers.get('chatid')
     new_chat = chat_id is None
     if chat_id is None:
-        db_chat_id = database.new_chat(title=f"New_Chat", commit=False)
+        db_chat_id = database.new_chat(title='New Chat', commit=False)
     
     try:
-        # Extract the message content from the request body
-        request_data = await req.json()
-        messages = request_data.get("messages", None)
 
         if not messages:
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Messages content is required")
@@ -249,3 +254,15 @@ async def branch_picker(chatId: str, request: BranchPickerRequest):
         "headId": str(head_id),
         "messages": messages
     }
+
+@app.get("/chats")
+async def get_chats():
+    chats = [
+        {
+            'ChatId': chat['ChatId'],
+            'title': chat['title'],
+            'Timestamp': change_time_to_local(chat['Timestamp'])
+        }
+        for chat in database.get_all_chats()
+    ]
+    return chats
