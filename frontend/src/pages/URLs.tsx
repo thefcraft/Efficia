@@ -46,6 +46,7 @@ import {
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import api, { BaseUrlResponse } from '@/lib/api';
+import { base64UrlEncode } from '@/lib/utils';
 
 // URL interface
 interface URL {
@@ -192,7 +193,7 @@ const URLs = () => {
         const res = await api.get(`/baseUrls`);
         const data = res.data; // You can map it to your ActivityEntry format here
         setUrls(data.map((item: BaseUrlResponse) => ({
-          id: item.id,
+          id: base64UrlEncode(item.baseURL),
           url: item.baseURL,
           title: item.Title,
           description: item.Description,
@@ -429,7 +430,7 @@ const URLs = () => {
                           filteredURLs.map((url) => (
                             <TableRow key={url.id} className="cursor-pointer hover:bg-muted/50" onClick={() => handleViewURL(url.id)}>
                               <TableCell className="font-medium text-xl">
-                                <img src={url.icon} alt="Executable Icon" className="h-8 w-8"/>
+                                <img src={url.icon} alt="Executable Icon" className="h-8 w-8 min-w-8 min-h-8"/>
                               </TableCell>
                               <TableCell>
                                 <div className="font-medium">{url.title}</div>

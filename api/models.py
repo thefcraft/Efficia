@@ -1,14 +1,20 @@
-from typing import Optional, Dict
+from typing import Optional, Dict, List
 from pydantic import BaseModel
 from datetime import datetime, time
 
+
+
+class GetActivitiesById(BaseModel):
+    id: int | str
+
+class BoolResponse(BaseModel):
+    sucess: bool
 
 #####################################################################################
 #                                   App                                             #
 #####################################################################################
 
-class AppResponse(BaseModel):
-    id: str # @base64
+class IApp(BaseModel):
     AppId: str
     ExeFileName: str
     ExeDirName: str
@@ -27,6 +33,7 @@ class AppResponse(BaseModel):
     SpecialBuild: Optional[str] = None
     BlockId: Optional[int] = None
     Category: Optional[str] = None
+class AppResponse(IApp):
     Timestamp: datetime
     ICON: str
 
@@ -45,12 +52,36 @@ class GetAppResponse(BaseModel):
     Sat: float
     Sun: float
 
+    hour_0: float
+    hour_1: float
+    hour_2: float
+    hour_3: float
+    hour_4: float
+    hour_5: float
+    hour_6: float
+    hour_7: float
+    hour_8: float
+    hour_9: float
+    hour_10: float
+    hour_11: float
+    hour_12: float
+    hour_13: float
+    hour_14: float
+    hour_15: float
+    hour_16: float
+    hour_17: float
+    hour_18: float
+    hour_19: float
+    hour_20: float
+    hour_21: float
+    hour_22: float
+    hour_23: float
+
 #####################################################################################
 #                                   BaseUrl                                         #
 #####################################################################################
 
 class BaseUrlResponse(BaseModel):
-    id: str # @base64
     baseURL: str
     Title: Optional[str] = None
     Description: Optional[str] = None
@@ -65,20 +96,27 @@ class BaseUrlResponse(BaseModel):
 #                              ActivityEntry                                        #
 #####################################################################################
 
-class ActivityEntryResponse(BaseModel):
-    EntryId: int
+class IActivity(BaseModel):
     AppId: str
     Title: str
     URL: Optional[str] = None
     IsActive: bool
     IdleDuration: float
     Duration: float
+
+class ActivityEntryResponse(IActivity):
+    EntryId: int
     EndTime: datetime
     URL_ICON: Optional[str] = None
 
 class GetActivity(BaseModel):
     app: AppResponse
     activity: ActivityEntryResponse
+
+class CreateUpdateActivity(BaseModel):
+    activity: IActivity
+    EntryId: Optional[int] = None
+    commit: bool = False
 
 #####################################################################################
 #                               _TODO                                               #

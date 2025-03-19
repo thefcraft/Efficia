@@ -11,6 +11,7 @@ import { Link } from 'react-router-dom';
 import { toast } from "@/hooks/use-toast";
 import api, { AppResponse, Category } from '@/lib/api';
 import { API_BASE_URL } from '@/lib/constants';
+import { base64UrlEncode } from '@/lib/utils';
 
 // App interface based on the provided database schema
 interface App {
@@ -123,7 +124,7 @@ const Apps = () => {
         const res = await api.get(`/apps`);
         const data = res.data; // You can map it to your ActivityEntry format here
         setApps(data.map((item: AppResponse) => ({
-          id: `${item.id}`,
+          id: base64UrlEncode(item.AppId),
           name: item.AppId,
           exeFileName: item.ExeFileName,
           exeDirName: item.ExeDirName,
@@ -306,7 +307,7 @@ const Apps = () => {
                     filteredApps.map((app) => (
                       <TableRow key={app.id}>
                         <TableCell>
-                          <img src={app.icon} alt="Executable Icon" className="h-8 w-8"/>
+                          <img src={app.icon} alt="Executable Icon" className="h-8 w-8 min-w-8 min-h-8"/>
                         </TableCell>
                         <TableCell className="font-medium">{app.name}</TableCell>
                         <TableCell>{app.category || 'Uncategorized'}</TableCell>

@@ -286,13 +286,13 @@ export function SideNavigation() {
   return (
     <aside className={cn(
       "h-screen top-0 border-r bg-background flex flex-col transition-all duration-300 w-80 shadow-sm relative",
-      sidebarCollapsed ? "w-16" : "w-72 min-w-72 max-w-72"
+      sidebarCollapsed ? "w-0" : "w-72 min-w-72 max-w-72"
     )}>
       <div className='absolute right-0 h-full w-4 -mr-4 flex flex-row items-center opacity-0 hover:opacity-100'>
         {sidebarCollapsed?
-          <ChevronRight className="h-4 w-4 cursor-pointer" onClick={toggleSidebar} />
+          <ChevronRight className="h-8 w-4 py-2 cursor-pointer" onClick={toggleSidebar} />
           :
-          <ChevronLeft className="h-4 w-4 cursor-pointer" onClick={toggleSidebar} />
+          <ChevronLeft className="h-8 w-4 py-2 cursor-pointer" onClick={toggleSidebar} />
         }
       </div>
       <div className="p-3 flex items-center justify-between border-b">

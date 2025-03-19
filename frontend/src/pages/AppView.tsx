@@ -22,10 +22,10 @@ import {
 } from 'recharts';
 import api, { AppResponse, Category, GetAppResponse } from '@/lib/api';
 import { API_BASE_URL } from '@/lib/constants';
+import { base64UrlDecode } from '@/lib/utils';
 
 // App interface based on the provided database schema
 interface App {
-  id: string;
   name: string;
   exeFileName: string;
   exeDirName: string;
@@ -48,119 +48,7 @@ interface App {
   dailyLimit?: string;
 }
 
-// Mock apps data - would come from a database in a real app
-const mockApps: App[] = [
-  {
-    id: '1',
-    name: 'Chrome',
-    exeFileName: 'chrome.exe',
-    exeDirName: 'C:\\Program Files\\Google\\Chrome\\Application',
-    isBrowser: true,
-    icon: 'C',
-    category: 'Web Browser',
-    companyName: 'Google LLC',
-    productName: 'Google Chrome',
-    fileVersion: '119.0.6045.160',
-    productVersion: '119.0.6045.160',
-    fileDescription: 'Google Chrome Web Browser',
-    internalName: 'Chrome',
-    legalCopyright: '© Google LLC. All rights reserved.',
-    legalTrademarks: 'Google Chrome™',
-    originalFilename: 'chrome.exe',
-    isBlocked: false
-  },
-  {
-    id: '2',
-    name: 'Firefox',
-    exeFileName: 'firefox.exe',
-    exeDirName: 'C:\\Program Files\\Mozilla Firefox',
-    isBrowser: true,
-    icon: 'F',
-    category: 'Web Browser',
-    companyName: 'Mozilla Corporation',
-    productName: 'Mozilla Firefox',
-    fileVersion: '119.0',
-    productVersion: '119.0',
-    fileDescription: 'Mozilla Firefox Web Browser',
-    isBlocked: true,
-    dailyLimit: '01:00'
-  },
-  {
-    id: '3',
-    name: 'Visual Studio Code',
-    exeFileName: 'Code.exe',
-    exeDirName: 'C:\\Program Files\\Microsoft VS Code',
-    isBrowser: false,
-    icon: 'V',
-    category: 'Development Tools',
-    companyName: 'Microsoft Corporation',
-    productName: 'Visual Studio Code',
-    fileVersion: '1.83.1',
-    productVersion: '1.83.1',
-    fileDescription: 'Code Editing. Redefined.',
-    isBlocked: false
-  },
-  {
-    id: '4',
-    name: 'Discord',
-    exeFileName: 'Discord.exe',
-    exeDirName: 'C:\\Users\\AppData\\Local\\Discord',
-    isBrowser: false,
-    icon: 'D',
-    category: 'Communication',
-    companyName: 'Discord Inc.',
-    productName: 'Discord',
-    fileVersion: '1.0.9005',
-    productVersion: '1.0.9005',
-    fileDescription: 'Discord - Chat for Gamers',
-    isBlocked: true
-  },
-  {
-    id: '5',
-    name: 'Steam',
-    exeFileName: 'steam.exe',
-    exeDirName: 'C:\\Program Files (x86)\\Steam',
-    isBrowser: false,
-    icon: 'S',
-    category: 'Games',
-    companyName: 'Valve Corporation',
-    productName: 'Steam',
-    fileVersion: '7.54.26.36',
-    productVersion: '7.54.26.36',
-    fileDescription: 'Steam Client Bootstrapper',
-    isBlocked: false
-  }
-];
-
-
 // Mock usage data for charts
-
-const usageByHourData = [
-  { hour: '00:00', minutes: 15 },
-  { hour: '01:00', minutes: 5 },
-  { hour: '02:00', minutes: 0 },
-  { hour: '03:00', minutes: 0 },
-  { hour: '04:00', minutes: 0 },
-  { hour: '05:00', minutes: 0 },
-  { hour: '06:00', minutes: 0 },
-  { hour: '07:00', minutes: 10 },
-  { hour: '08:00', minutes: 30 },
-  { hour: '09:00', minutes: 120 },
-  { hour: '10:00', minutes: 85 },
-  { hour: '11:00', minutes: 60 },
-  { hour: '12:00', minutes: 45 },
-  { hour: '13:00', minutes: 75 },
-  { hour: '14:00', minutes: 90 },
-  { hour: '15:00', minutes: 105 },
-  { hour: '16:00', minutes: 70 },
-  { hour: '17:00', minutes: 45 },
-  { hour: '18:00', minutes: 20 },
-  { hour: '19:00', minutes: 35 },
-  { hour: '20:00', minutes: 50 },
-  { hour: '21:00', minutes: 40 },
-  { hour: '22:00', minutes: 25 },
-  { hour: '23:00', minutes: 10 },
-];
 
 const usageByActivityData = [
   { name: 'Research', value: 40 },
@@ -187,6 +75,7 @@ const AppView = () => {
     avg_uses_this_week: number
     avg_uses_this_week_increase_percentage: number
   } | null>(null)
+  const [usageByHourData, setUsageByHourData] = useState<{ hour: string, minutes: number }[]>([]);
 
   const [categories, setCategories] = useState<string[]>([]);
 
@@ -196,10 +85,11 @@ const AppView = () => {
     if (loading) return;
     setLoading(true);
     try {
-        const res = await api.get(`/apps/${appId}`);
+        const res = await api.post(`/apps/get_detail`, {
+          'id': base64UrlDecode(appId)
+        });
         const data: GetAppResponse = res.data; // You can map it to your ActivityEntry format here
         setApp({
-          id: `${data.app.id}`,
           name: data.app.AppId,
           exeFileName: data.app.ExeFileName,
           exeDirName: data.app.ExeDirName,
@@ -214,7 +104,6 @@ const AppView = () => {
           category: data.app.Category
         });
         setEditableApp({
-          id: `${data.app.id}`,
           name: data.app.AppId,
           exeFileName: data.app.ExeFileName,
           exeDirName: data.app.ExeDirName,
@@ -243,6 +132,32 @@ const AppView = () => {
             { day: 'Sat', hours: Math.round(data.Sat * 100) / 100 },
             { day: 'Sun', hours: Math.round(data.Sun * 100) / 100 },
           ])
+        setUsageByHourData([
+          { hour: '00:00', minutes: Math.round(data.hour_0*60*100)/100 },
+          { hour: '01:00', minutes: Math.round(data.hour_1*60*100)/100 },
+          { hour: '02:00', minutes: Math.round(data.hour_2*60*100)/100 },
+          { hour: '03:00', minutes: Math.round(data.hour_3*60*100)/100 },
+          { hour: '04:00', minutes: Math.round(data.hour_4*60*100)/100 },
+          { hour: '05:00', minutes: Math.round(data.hour_5*60*100)/100 },
+          { hour: '06:00', minutes: Math.round(data.hour_6*60*100)/100 },
+          { hour: '07:00', minutes: Math.round(data.hour_7*60*100)/100 },
+          { hour: '08:00', minutes: Math.round(data.hour_8*60*100)/100 },
+          { hour: '09:00', minutes: Math.round(data.hour_9*60*100)/100 },
+          { hour: '10:00', minutes: Math.round(data.hour_10*60*100)/100 },
+          { hour: '11:00', minutes: Math.round(data.hour_11*60*100)/100 },
+          { hour: '12:00', minutes: Math.round(data.hour_12*60*100)/100 },
+          { hour: '13:00', minutes: Math.round(data.hour_13*60*100)/100 },
+          { hour: '14:00', minutes: Math.round(data.hour_14*60*100)/100 },
+          { hour: '15:00', minutes: Math.round(data.hour_15*60*100)/100 },
+          { hour: '16:00', minutes: Math.round(data.hour_16*60*100)/100 },
+          { hour: '17:00', minutes: Math.round(data.hour_17*60*100)/100 },
+          { hour: '18:00', minutes: Math.round(data.hour_18*60*100)/100 },
+          { hour: '19:00', minutes: Math.round(data.hour_19*60*100)/100 },
+          { hour: '20:00', minutes: Math.round(data.hour_20*60*100)/100 },
+          { hour: '21:00', minutes: Math.round(data.hour_21*60*100)/100 },
+          { hour: '22:00', minutes: Math.round(data.hour_22*60*100)/100 },
+          { hour: '23:00', minutes: Math.round(data.hour_23*60*100)/100 },
+        ])
         const resCategory = await api.get(`/categories`);
         const dataCategory: Category[] = resCategory.data;
         setCategories(dataCategory.map((category) => category.Category))
@@ -565,7 +480,7 @@ const AppView = () => {
                   
                   <Card>
                     <CardHeader className="pb-2">
-                      <CardTitle className="text-lg font-medium">Usage by Hour of Day</CardTitle>
+                      <CardTitle className="text-lg font-medium">Avg Usage by Hour of Day</CardTitle>
                     </CardHeader>
                     <CardContent className="h-96">
                       <ResponsiveContainer width="100%" height="100%">

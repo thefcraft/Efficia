@@ -122,7 +122,7 @@ async def stream_chat_response(messages: list, chat_id: str, new_chat: bool):
                             })
             
         response = await groq_client.chat.completions.create(
-            model="llama3-70b-8192",
+            model="qwen-2.5-32b",
             messages=formatted_messages,
             stream=True
         )

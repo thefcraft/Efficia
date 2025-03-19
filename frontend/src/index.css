@@ -153,3 +153,17 @@
     transform: translateY(0);
   }
 }
+
+/* .thread-viewport > [data-radix-scroll-area-content] { ???
+  @apply flex flex-col items-center self-stretch bg-inherit;
+} */
+
+/* pre {
+  background-color: var(--sidebar-accent) !important;
+  border-color: var(--border);
+  border-width: 1px;
+  border-top: none;
+} */
+/* pre > * {
+  color: #fcfcfc; 
+} */

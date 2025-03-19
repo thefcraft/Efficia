@@ -1,4 +1,4 @@
-from db import get_database, DataBase, logger
+from db import get_database_Api as get_database, DataBase_Api as DataBase, logger
 from db.models import IUrl, IApp, IActivityEntry
 from .background_service_helper import App, SleepError
 from .constants import INTERVAL, INACTIVITY_LIMIT, SAVE_EVERY#, MIN_DURATION_TO_SAVE
@@ -25,6 +25,7 @@ def service(database: DataBase):
     last_activity_index: Optional[int] = None
     time_since_update = 0
     old_app_iEntry = old_app.get_iEntry(active=old_active, idleDuration=old_idle_duration, entry_duration=entry_duration)
+    is_first: bool = True
     while True:
         time.sleep(INTERVAL) # entry_duration + INTERVAL because i am sleeping before this...
         try:
@@ -46,7 +47,7 @@ def service(database: DataBase):
             continue
         
         # new_app.get_window_gui_debug_info()
-        if new_app_id == old_app_id: # same app
+        if new_app_id == old_app_id and not is_first: # same app
             if new_entry_id == old_entry_id or (full_screen_entry_id and full_screen_entry_id == old_entry_id): # same window in an app
                 if old_active == new_active: # same app and old one has same active state
                     logger.debug(f"SAME APP AND WINDOW AND ACTIVE STATE")
@@ -111,7 +112,7 @@ def service(database: DataBase):
                     commit=False
                 )
             database.insert_app(
-                app=new_app.get_iApp(), commit=False
+                app=new_app.get_iApp()
             )
             new_app.save_icon()
             # ------------------------
@@ -124,13 +125,14 @@ def service(database: DataBase):
             last_activity_index = None
             time_since_update = 0
             old_app_iEntry = new_app.get_iEntry(active=new_active, idleDuration=new_idle_duration, entry_duration=entry_duration)
+            is_first = False
 
-def run_service():
-    database = get_database()
+def run_service(check_server_status: bool = True):
+    database = get_database(check_server_status)
     try:
         service(database)
     except KeyboardInterrupt as e:
         ...
-    finally:
-        database.close(commit=True)
+    # finally:
+    #     database.close(commit=True)
     print("running background service")

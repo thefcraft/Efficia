@@ -28,6 +28,7 @@ import CategoryView from "./pages/CategoryView";
 import URLs from "./pages/URLs";
 import ChatBotHome from "./pages/chatbot/home";
 import ChatBotChat from "./pages/chatbot/chat";
+import VoiceBotHome from "./pages/chatbot/voice.home";
 
 
 const queryClient = new QueryClient();
@@ -81,6 +82,7 @@ const App = () => {
             <Route path="/settings" element={<Settings />} />
 
             <Route path="/chat" element={<ChatBotHome />} />
+            <Route path="/chat/voice" element={<VoiceBotHome />} />
             <Route path="/chat/:chatId" element={<ChatBotChat />} />
             
             {/* Catch-all route for 404 errors */}

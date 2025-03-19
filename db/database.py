@@ -1,22 +1,41 @@
 import sqlite3
-from typing import Optional
+from typing import Optional, Union
 from .models import IActivityEntry, IApp, IBaseUrl, IUrl
 from .models import IFetchActivityEntry, IFetchApp, IFetchBaseUrl, IFetchUrl
 from . import models
 from .helpers import get_baseurl, logger, get_url_info
 from ml import langchain_classification
+from contextlib import contextmanager
 
+class NullCursor:
+    """A placeholder cursor that raises an error if used outside the context."""
+    def __getattr__(self, name):
+        # Raise an error if any method or attribute is accessed on the NullCursor
+        raise RuntimeError(f"Cursor is None, Please Run inside with database.cursor_context() as cursor: ...")
+    
 class DataBase:
-    def __init__(self, db_path: str):
+    def __init__(self, db_path: str, check_create_table: bool = True, check_same_thread: bool = False):
         # Connect to SQLite database
-        self.conn = sqlite3.connect(db_path)
+        self.conn = sqlite3.connect(db_path, check_same_thread=check_same_thread)
         self.conn.row_factory = sqlite3.Row # Set row_factory to sqlite3.Row so that results are returned as dictionaries
+        self.cursor: Union[sqlite3.Cursor, NullCursor] = NullCursor()
+        with self.cursor_context() as cursor:
+            if check_create_table: self.create_table()
+    
+    @contextmanager
+    def cursor_context(self):
         self.cursor = self.conn.cursor()
-        self.create_table()
-        
+        try:
+            yield self.cursor  # Yield the cursor to the block of code using the context
+        finally:
+            self.cursor.close()  # Ensure the cursor is closed after use
+            self.cursor = NullCursor()  # Remove the reference to the cursor
+
     def close(self, commit: bool = False) -> None:
         if commit: self.conn.commit()
         self.conn.close()
+    def commit(self) -> None:
+        return self.conn.commit()
     
     def create_table(self):
         models.create_block(self.cursor)
