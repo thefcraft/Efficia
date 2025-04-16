@@ -47,6 +47,7 @@ import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import api, { BaseUrlResponse } from '@/lib/api';
 import { base64UrlEncode } from '@/lib/utils';
+import { ImageWithFallback } from '@/components/utils';
 
 // URL interface
 interface URL {
@@ -200,8 +201,8 @@ const URLs = () => {
           icon: item.icon_url,
           category: item.Category,
           isBlocked: false,
-          // lastVisited?: string;
-          // visitCount?: number;
+          lastVisited: item.lastVisited,
+          visitCount: item.visitCount,
           // dailyLimit?: string;
           // tags?: string[];
         })));
@@ -430,7 +431,7 @@ const URLs = () => {
                           filteredURLs.map((url) => (
                             <TableRow key={url.id} className="cursor-pointer hover:bg-muted/50" onClick={() => handleViewURL(url.id)}>
                               <TableCell className="font-medium text-xl">
-                                <img src={url.icon} alt="Executable Icon" className="h-8 w-8 min-w-8 min-h-8"/>
+                                <ImageWithFallback src={url.icon || 'none'} fallbackSrc={'http://localhost:8080/null_url.png'} alt="Executable Icon" className="h-8 w-8 min-w-8 min-h-8"/>
                               </TableCell>
                               <TableCell>
                                 <div className="font-medium">{url.title}</div>

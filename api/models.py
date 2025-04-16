@@ -10,6 +10,12 @@ class GetActivitiesById(BaseModel):
 class BoolResponse(BaseModel):
     sucess: bool
 
+class AddActivityResponse(BoolResponse):
+    EntryId: int
+    
+class DateTime(BaseModel):
+    datetime: str
+    
 #####################################################################################
 #                                   App                                             #
 #####################################################################################
@@ -90,7 +96,48 @@ class BaseUrlResponse(BaseModel):
     BlockId: Optional[int] = None
     Category: Optional[str] = None
     Timestamp: datetime
+    visitCount: Optional[int] = None
+    lastVisited: Optional[datetime] = None
 
+class GetBaseUrlResponse(BaseModel):
+    baseurl: BaseUrlResponse
+    total_uses_this_week: float
+    total_uses_this_week_increase_percentage: float
+    avg_uses_this_week: float
+    avg_uses_this_week_increase_percentage: float
+
+    Mon: float
+    Tue: float
+    Wed: float
+    Thu: float
+    Fri: float
+    Sat: float
+    Sun: float
+
+    hour_0: float
+    hour_1: float
+    hour_2: float
+    hour_3: float
+    hour_4: float
+    hour_5: float
+    hour_6: float
+    hour_7: float
+    hour_8: float
+    hour_9: float
+    hour_10: float
+    hour_11: float
+    hour_12: float
+    hour_13: float
+    hour_14: float
+    hour_15: float
+    hour_16: float
+    hour_17: float
+    hour_18: float
+    hour_19: float
+    hour_20: float
+    hour_21: float
+    hour_22: float
+    hour_23: float
 
 #####################################################################################
 #                              ActivityEntry                                        #
@@ -116,7 +163,6 @@ class GetActivity(BaseModel):
 class CreateUpdateActivity(BaseModel):
     activity: IActivity
     EntryId: Optional[int] = None
-    commit: bool = False
 
 #####################################################################################
 #                               _TODO                                               #

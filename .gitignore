@@ -17,3 +17,6 @@ readme.me.md
 .vscode
 .temp
 debug.database.db
+.chainlit
+.files
+chainlit.md

@@ -448,6 +448,7 @@ class DataBase:
         self.cursor.execute("""--sql                    
             SELECT ChatId, title, leaf_node_id, active_depth, Timestamp
             FROM Chats
+            ORDER BY Timestamp DESC
         """, ())
         chats = self.cursor.fetchall()
         return chats

@@ -57,7 +57,7 @@ def service(database: DataBase):
                                 active=old_active, idleDuration=old_idle_duration, entry_duration=entry_duration + INTERVAL
                             ), 
                             EntryId=last_activity_index,
-                            commit=True # NOTE: SAVE_EVERY
+                            # commit=True # NOTE: SAVE_EVERY
                         )
                         time_since_update = 0
                     # ------------------------
@@ -73,7 +73,7 @@ def service(database: DataBase):
                                 active=old_active, idleDuration=old_idle_duration, entry_duration=entry_duration + INTERVAL
                             ), 
                             EntryId=last_activity_index,
-                            commit=False
+                            # commit=True
                         )
                     # ------------------------
                     old_active = new_active
@@ -90,7 +90,7 @@ def service(database: DataBase):
                             active=old_active, idleDuration=old_idle_duration, entry_duration=entry_duration + INTERVAL
                         ), 
                         EntryId=last_activity_index,
-                        commit=False
+                        # commit=True
                     )
                 # ------------------------
                 old_app = new_app
@@ -109,7 +109,7 @@ def service(database: DataBase):
                         active=old_active, idleDuration=old_idle_duration, entry_duration=entry_duration + INTERVAL
                     ), 
                     EntryId=last_activity_index,
-                    commit=False
+                    # commit=True
                 )
             database.insert_app(
                 app=new_app.get_iApp()

@@ -5,7 +5,7 @@ from langchain.chains.llm import LLMChain
 
 model = ChatGroq(
     api_key="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",
-    model="mixtral-8x7b-32768"
+    model="llama-3.3-70b-versatile"
 )
 
 class TitleResponse(BaseModel):

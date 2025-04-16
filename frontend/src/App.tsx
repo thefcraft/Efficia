@@ -29,9 +29,23 @@ import URLs from "./pages/URLs";
 import ChatBotHome from "./pages/chatbot/home";
 import ChatBotChat from "./pages/chatbot/chat";
 import VoiceBotHome from "./pages/chatbot/voice.home";
+import URLView from "./pages/URLView";
+import AudioTranscription from "./pages/chatbot/tmp";
+import { useBackend, BackendProvider } from "./hooks/use-backend";
 
 
 const queryClient = new QueryClient();
+
+const Loading = ({ children }: { children: React.ReactNode }) => {
+  const { loading } = useBackend();
+  return loading ? (
+    <div className="flex items-center justify-center h-screen">
+      <div className="loader"></div>
+    </div>
+  ) : (
+    <>{children}</>
+  );
+}
 
 const App = () => {
   const { fontSize, applyTheme } = useThemeStore();
@@ -54,6 +68,8 @@ const App = () => {
   }, [fontSize, applyTheme]);
 
   return (
+<BackendProvider>
+  <Loading>
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
         <Toaster />
@@ -70,7 +86,7 @@ const App = () => {
             <Route path="/apps" element={<Apps />} />
             <Route path="/apps/:appId" element={<AppView />} />
             <Route path="/urls" element={<URLs />} />
-            {/* <Route path="/urls/:urlId" element={<URLView />} /> */}
+            <Route path="/urls/:urlId" element={<URLView />} />
             <Route path="/categories" element={<Categories />} />
             <Route path="/categories/:categoryIdb64" element={<CategoryView />} />
             <Route path="/timers" element={<Timers />} />
@@ -83,6 +99,7 @@ const App = () => {
 
             <Route path="/chat" element={<ChatBotHome />} />
             <Route path="/chat/voice" element={<VoiceBotHome />} />
+            <Route path="/chat/tmp" element={<AudioTranscription />} />
             <Route path="/chat/:chatId" element={<ChatBotChat />} />
             
             {/* Catch-all route for 404 errors */}
@@ -91,6 +108,8 @@ const App = () => {
         </BrowserRouter>
       </TooltipProvider>
     </QueryClientProvider>
+  </Loading>
+</BackendProvider>
   );
 };
 

@@ -62,6 +62,18 @@ async def get_icon(image_name: str):
 async def root():
     return {"message": "Welcome to Efficia API"}
 
+@app.get("/api/server_time", tags=["Time"], response_model=models.DateTime)
+async def server_time(
+    database: DataBase = Depends(get_db)
+):
+    with database.cursor_context() as cursor:
+        query = """--sql
+            SELECT datetime('now') AS current_time
+        """
+        cursor.execute(query, ())
+        row = cursor.fetchone()
+        datetime = row['current_time']
+    return models.DateTime(datetime=datetime)
 
 #####################################################################################
 #                                   App                                             #
@@ -220,8 +232,10 @@ async def add_app(
     database: DataBase = Depends(get_db)
 ):
     with database.cursor_context() as cursor:
-        database.insert_app(app=app.model_dump(), commit=False)
+        database.insert_app(app=app.model_dump(), commit=True)
     return models.BoolResponse(sucess=True)
+
+
 #####################################################################################
 #                                   BaseUrl                                         #
 #####################################################################################
@@ -240,6 +254,19 @@ async def get_activities(
         result = []
         for row in cursor.fetchall():
             base_url: str = row['baseURL']
+            
+            query = """--sql
+                SELECT COUNT(a.EntryId) as visit_count, MAX(a.EndTime) as Timestamp FROM ActivityEntries AS a
+                INNER JOIN URLs AS u on u.URL = a.URL
+                WHERE u.baseURL = ?
+            """
+
+            cursor.execute(query, (base_url, ))
+
+            rowother = cursor.fetchone()
+            visit_count: int = rowother['visit_count']
+            last_visited: str = rowother['Timestamp']
+
             url = models.BaseUrlResponse(
                         baseURL= base_url,
                         Title= row['Title'],
@@ -248,10 +275,124 @@ async def get_activities(
                         icon_url= row['icon_url'],
                         BlockId= row['BlockId'],
                         Category= row['Category'],
-                        Timestamp = row['Timestamp']
+                        Timestamp = row['Timestamp'],
+                        visitCount=visit_count,
+                        lastVisited=last_visited
                     )
             result.append(url)
         return result
+
+@app.post("/api/baseUrls/get_detail", tags=["BaseUrl"], response_model=models.GetBaseUrlResponse)
+async def get_activities(
+    id: models.GetActivitiesById,
+    database: DataBase = Depends(get_db)
+):
+    baseurl_id = id.id
+    with database.cursor_context() as cursor:
+        
+        query = """--sql
+            SELECT * FROM BaseURLs
+            WHERE baseURL = ?
+        """
+            
+        cursor.execute(query, (baseurl_id, ))
+        
+        row = cursor.fetchone()
+        base_url: str = row['baseURL']
+        result_baseurl = models.BaseUrlResponse(
+                    baseURL = base_url,
+                    Title = row['Title'],
+                    Description = row['Description'],
+                    is_fetched = row['is_fetched'],
+                    icon_url = row['icon_url'],
+                    BlockId = row['BlockId'],
+                    Category = row['Category'],
+                    Timestamp = row['Timestamp'],
+                    visitCount = None,
+                    lastVisited = None
+                )
+            
+        query = """--sql
+            SELECT COUNT(a.EntryId) as visit_count, MAX(a.EndTime) as Timestamp FROM ActivityEntries AS a
+            INNER JOIN URLs AS u on u.URL = a.URL
+            WHERE u.baseURL = ?
+        """
+        cursor.execute(query, (base_url, ))
+        rowother = cursor.fetchone()
+        visit_count: int = rowother['visit_count']
+        last_visited: str = rowother['Timestamp']
+        result_baseurl.visitCount = visit_count
+        result_baseurl.lastVisited = last_visited
+        
+        
+        today = datetime.now(timezone.utc)
+        start_of_week = today - timedelta(days=today.weekday())  # Monday of this week
+        days_of_week = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
+        weekly_usage: Dict[Literal['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'], float] = {day: 0.0 for day in days_of_week}
+        total_uses = 0
+        query = """--sql
+            SELECT 
+                date(EndTime) as day, SUM(Duration) as total_uses
+            FROM ActivityEntries
+            INNER JOIN URLs AS u on u.URL = ActivityEntries.URL
+            WHERE u.baseURL = ?
+            AND date(EndTime) >= ?
+            GROUP BY date(EndTime)
+        """
+        cursor.execute(query, (base_url, start_of_week.date()))
+        rows = cursor.fetchall()
+        for row in rows:
+            day_date = row['day']
+            daily_hours = (row['total_uses'] or 0) / 3600  # Convert to hours
+            day_name = days_of_week[(datetime.strptime(day_date, "%Y-%m-%d").weekday())]
+            weekly_usage[day_name] = daily_hours
+            total_uses += daily_hours
+        
+        
+        hourly_usage = {f"hour_{hour}": 0.0 for hour in range(24)}
+        query = """--sql
+            SELECT strftime('%H', EndTime) AS hour, SUM(Duration) AS total_uses
+            FROM ActivityEntries
+            INNER JOIN URLs AS u on u.URL = ActivityEntries.URL
+            WHERE u.baseURL = ?
+            AND date(EndTime) >= ?
+            GROUP BY hour
+        """
+        cursor.execute(query, (base_url, start_of_week.date()))
+        rows = cursor.fetchall()
+    
+        # Populate the hourly_usage dictionary
+        for row in rows:
+            hourly_usage[f"hour_{row['hour']}"] = (row['total_uses'] or 0) / (3600 * (today.weekday()+1))  # Convert to hours and average over 7 days
+
+    
+        start_of_last_week = start_of_week - timedelta(weeks=1)  # Monday of last week
+        end_of_last_week = start_of_last_week + timedelta(days=6)  # Sunday of last week
+
+
+        query = """--sql
+            SELECT 
+                SUM(Duration) AS total_uses
+            FROM ActivityEntries
+            INNER JOIN URLs AS u on u.URL = ActivityEntries.URL
+            WHERE u.baseURL = ?
+            AND date(EndTime) >= ? AND date(EndTime) <= ?
+        """
+        cursor.execute(query, (base_url, start_of_last_week, end_of_last_week))
+        row = cursor.fetchone()
+        total_uses_sec = row['total_uses']
+        total_uses_last_week = total_uses_sec / 3600 if total_uses_sec else 0
+        avg_uses_last_week = total_uses_last_week/7
+        avg_uses = total_uses / (today.weekday()+1)
+        return models.GetBaseUrlResponse(
+            baseurl=result_baseurl,
+            total_uses_this_week = total_uses,
+            total_uses_this_week_increase_percentage = ((total_uses - total_uses_last_week) / total_uses_last_week) * 100 if total_uses_last_week != 0 else 0,
+            avg_uses_this_week = avg_uses,
+            avg_uses_this_week_increase_percentage= ((avg_uses - avg_uses_last_week) / avg_uses_last_week) * 100 if avg_uses_last_week != 0 else 0,
+            **weekly_usage,
+            **hourly_usage
+        )
 
 
 #####################################################################################
@@ -344,18 +485,18 @@ async def get_activities(
             )
         return result
 
-@app.post("/api/activity/", tags=["Activity"], response_model=models.BoolResponse)
+@app.post("/api/activity/", tags=["Activity"], response_model=models.AddActivityResponse)
 async def add_activity(
     data: models.CreateUpdateActivity,
     database: DataBase = Depends(get_db)
 ):
     with database.cursor_context() as cursor:
-        database.update_or_insert_activity(
+        EntryId = database.update_or_insert_activity(
             activity=data.activity.model_dump(),
             EntryId=data.EntryId,
-            commit=data.commit
+            commit=True
         )
-    return models.BoolResponse(sucess=True)
+    return models.AddActivityResponse(sucess=True, EntryId=EntryId)
 
 #####################################################################################
 #                                   _Todo                                           #

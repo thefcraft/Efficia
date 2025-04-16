@@ -27,12 +27,15 @@ class DataBase_Api:
             **app
         })
         assert resp.ok
-    def update_or_insert_activity(self, activity: IActivityEntry, EntryId: Optional[int] = None, commit: bool = True):
+    def update_or_insert_activity(self, activity: IActivityEntry, EntryId: Optional[int] = None) -> int: #, commit: bool = True):
         resp = requests.post(f"{self.url}/api/activity/", json={
             "activity": activity,
             "EntryId": EntryId,
-            "commit": commit
+            # "commit": commit
         })
         assert resp.ok
+        EntryId: Optional[int] = resp.json().get('EntryId')
+        assert EntryId is not None, "Something Went EntryId is None"
+        return EntryId
 def get_database_Api(check_server_status: bool = True) -> DataBase_Api:
     return DataBase_Api('http://127.0.0.1:8000', check_server_status=check_server_status)

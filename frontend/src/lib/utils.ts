@@ -15,14 +15,16 @@ export function getCurrentDate(): string {
   return `${year}-${month}-${day}`;
 }
 
-export function formatDate(dateString?: string): string | null {
+export function formatDate(dateString?: string, timeDelta?: number): string | null {
   if (!dateString) return null;
   const date = new Date(dateString);
+  if (timeDelta) date.setMilliseconds(date.getMilliseconds() + timeDelta); // Adjust for the time delta
   return `${date.toLocaleTimeString([], {hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true})} ${date.getDate()}-${date.getMonth() + 1}-${String(date.getFullYear())}`;
 }
 
-export function formatDateWithOffset(dateString: string, offsetInSeconds: number): string {
+export function formatDateWithOffset(dateString: string, offsetInSeconds: number, timeDelta?: number): string {
   const date = new Date(dateString);
+  if (timeDelta) date.setMilliseconds(date.getMilliseconds() + timeDelta); // Adjust for the time delta
   date.setSeconds(date.getSeconds() - offsetInSeconds);
   return `${date.toLocaleTimeString([], {hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true})}`;
 }

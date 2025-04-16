@@ -23,6 +23,7 @@ import { Badge } from '@/components/ui/badge';
 import { getCurrentDate, formatDate, formatDateWithOffset } from '@/lib/utils';
 import api, {GetActivity} from '@/lib/api';
 import { API_BASE_URL } from '@/lib/constants';
+import { useBackend } from '@/hooks/use-backend';
 
 // Define activity entry type
 interface ActivityEntry {
@@ -47,6 +48,7 @@ export function ActivityHistory() {
   const [page, setPage] = useState(0);  // Track the current page for pagination
   const [hasMore, setHasMore] = useState(true);  // Track if more data is available
   
+  const { timeDelta } = useBackend(); // Get time delta from backend context
   
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     // const term = e.target.value;
@@ -88,8 +90,8 @@ export function ActivityHistory() {
           url: item.activity.URL || undefined,
           isActive: item.activity.IsActive,
           duration: `${item.activity.Duration}`,
-          startTime: formatDateWithOffset(item.activity.EndTime, item.activity.Duration),  // Adjust startTime as needed
-          endTime: formatDate(item.activity.EndTime),
+          startTime: formatDateWithOffset(item.activity.EndTime, item.activity.Duration, timeDelta),  // Adjust startTime as needed
+          endTime: formatDate(item.activity.EndTime, timeDelta),
           idleDuration: `${item.activity.IdleDuration}`,
           category: undefined, // Add category if needed
         }))]);

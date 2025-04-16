@@ -88,6 +88,8 @@ export interface BaseUrlResponse{
     BlockId: number | null
     Category: string | null
     Timestamp: string
+    visitCount: number
+    lastVisited: string
 }
 
 // #####################################################################################
