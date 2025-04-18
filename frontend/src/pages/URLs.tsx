@@ -1,4 +1,3 @@
-
 import React, { useState, useMemo, useEffect } from 'react';
 import { SideNavigation } from '@/components/layout/SideNavigation';
 import { Header } from '@/components/Header';
@@ -30,7 +29,8 @@ import {
   ArrowUpDown,
   Eye,
   ExternalLink,
-  Filter
+  Filter,
+  Loader2
 } from 'lucide-react';
 import { toast } from "@/hooks/use-toast";
 import { Badge } from '@/components/ui/badge';
@@ -43,9 +43,10 @@ import {
   DialogHeader,
   DialogTitle
 } from "@/components/ui/dialog";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import api, { BaseUrlResponse } from '@/lib/api';
+import api, { BaseUrlResponse, Category as ApiCategory, SimpleSuccessResponse } from '@/lib/api';
 import { base64UrlEncode } from '@/lib/utils';
 import { ImageWithFallback } from '@/components/utils';
 
@@ -64,108 +65,6 @@ interface URL {
   tags?: string[];
 }
 
-// Sample data
-const sampleURLs: URL[] = [
-  {
-    id: '1',
-    url: 'https://www.youtube.com',
-    title: 'YouTube',
-    description: 'Video sharing platform',
-    icon: '🎬',
-    category: 'Entertainment',
-    isBlocked: true,
-    lastVisited: '2023-11-20T10:30:00Z',
-    visitCount: 130,
-    tags: ['videos', 'entertainment', 'streaming']
-  },
-  {
-    id: '2',
-    url: 'https://www.facebook.com',
-    title: 'Facebook',
-    description: 'Social media platform',
-    icon: '👥',
-    category: 'Social Media',
-    isBlocked: false,
-    lastVisited: '2023-11-25T15:45:00Z',
-    visitCount: 85,
-    dailyLimit: '00:30',
-    tags: ['social', 'networking']
-  },
-  {
-    id: '3',
-    url: 'https://www.github.com',
-    title: 'GitHub',
-    description: 'Code hosting platform',
-    icon: '💻',
-    category: 'Development',
-    isBlocked: false,
-    lastVisited: '2023-11-24T13:20:00Z',
-    visitCount: 42,
-    tags: ['coding', 'development', 'git']
-  },
-  {
-    id: '4',
-    url: 'https://www.netflix.com',
-    title: 'Netflix',
-    description: 'Streaming service',
-    icon: '🍿',
-    category: 'Entertainment',
-    isBlocked: true,
-    lastVisited: '2023-11-18T20:15:00Z',
-    visitCount: 28,
-    tags: ['streaming', 'movies', 'tv']
-  },
-  {
-    id: '5',
-    url: 'https://www.twitter.com',
-    title: 'Twitter',
-    description: 'Social networking service',
-    icon: '🐦',
-    category: 'Social Media',
-    isBlocked: false,
-    lastVisited: '2023-11-25T09:10:00Z',
-    visitCount: 110,
-    dailyLimit: '01:00',
-    tags: ['social', 'news', 'trending']
-  },
-  {
-    id: '6',
-    url: 'https://www.linkedin.com',
-    title: 'LinkedIn',
-    description: 'Professional networking platform',
-    icon: '👔',
-    category: 'Professional',
-    isBlocked: false,
-    lastVisited: '2023-11-23T11:30:00Z',
-    visitCount: 15,
-    tags: ['professional', 'networking', 'jobs']
-  },
-  {
-    id: '7',
-    url: 'https://www.reddit.com',
-    title: 'Reddit',
-    description: 'Social news aggregation',
-    icon: '🔍',
-    category: 'Social Media',
-    isBlocked: true,
-    lastVisited: '2023-11-21T16:20:00Z',
-    visitCount: 65,
-    tags: ['forum', 'discussion', 'community']
-  },
-  {
-    id: '8',
-    url: 'https://www.amazon.com',
-    title: 'Amazon',
-    description: 'Online shopping platform',
-    icon: '🛒',
-    category: 'Shopping',
-    isBlocked: false,
-    lastVisited: '2023-11-24T18:45:00Z',
-    visitCount: 32,
-    tags: ['shopping', 'e-commerce', 'retail']
-  }
-];
-
 // Sample categories
 const categories = ['Entertainment', 'Social Media', 'Development', 'Professional', 'Shopping', 'News', 'Education'];
 
@@ -177,6 +76,7 @@ const URLs = () => {
   const [sortBy, setSortBy] = useState<'title' | 'lastVisited' | 'visitCount'>('lastVisited');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
   const [newURLDialogOpen, setNewURLDialogOpen] = useState(false);
+  const [blockingStatus, setBlockingStatus] = useState<Record<string, boolean>>({}); // Loading state per URL
   const [newURL, setNewURL] = useState({
     url: '',
     title: '',
@@ -266,12 +166,37 @@ const URLs = () => {
     }
   };
 
-  const handleToggleBlock = (url: URL) => {
-    // Here you would update your database
-    toast({
-      title: url.isBlocked ? "URL Unblocked" : "URL Blocked",
-      description: `${url.title || url.url} has been ${url.isBlocked ? 'unblocked' : 'blocked'}.`
-    });
+  const handleToggleBlock = async (urlToToggle: URL) => {
+    const originalStatus = urlToToggle.isBlocked;
+    const baseURL = urlToToggle.url; // Use original baseURL for API call
+
+    setBlockingStatus(prev => ({ ...prev, [baseURL]: true })); // Set loading
+    // Optimistic UI Update
+    setUrls(prevUrls =>
+      prevUrls.map(url =>
+        url.id === urlToToggle.id ? { ...url, isBlocked: !originalStatus } : url
+      )
+    );
+
+    try {
+      const response = await api.put<SimpleSuccessResponse>(`/urls/${encodeURIComponent(baseURL)}/block`, { block: !originalStatus }); // Ensure baseURL is encoded for the path
+      toast({
+        title: !originalStatus ? "URL Blocked" : "URL Unblocked",
+        description: response.data.message || `"${urlToToggle.title || baseURL}" status updated.`
+      });
+    } catch (error: any) {
+      console.error("Failed to toggle block status:", error);
+      const errorMsg = error.response?.data?.detail || "Failed to update block status.";
+      toast({ title: "Error", description: errorMsg, variant: "destructive" });
+      // Rollback optimistic update
+      setUrls(prevUrls =>
+        prevUrls.map(url =>
+          url.id === urlToToggle.id ? { ...url, isBlocked: originalStatus } : url
+        )
+      );
+    } finally {
+        setBlockingStatus(prev => ({ ...prev, [baseURL]: false })); // Reset loading
+    }
   };
 
   const handleAddNewURL = () => {
@@ -471,37 +396,21 @@ const URLs = () => {
                                 </Badge>
                               </TableCell>
                               <TableCell>
-                                <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
-                                  <Button variant="ghost" size="icon" onClick={() => handleViewURL(url.id)}>
-                                    <Eye className="h-4 w-4" />
-                                  </Button>
-                                  <Button 
-                                    variant="ghost" 
-                                    size="icon"
-                                    onClick={() => window.open(url.url, '_blank')}
-                                  >
-                                    <ExternalLink className="h-4 w-4" />
-                                  </Button>
+                                <div className="flex items-center justify-end gap-0" onClick={(e) => e.stopPropagation()}>
+                                  <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => window.open('https://'+url.url, '_blank')}><ExternalLink className="h-4 w-4" /></Button>
                                   <DropdownMenu>
-                                    <DropdownMenuTrigger asChild>
-                                      <Button variant="ghost" size="icon">
-                                        <MoreVertical className="h-4 w-4" />
-                                      </Button>
+                                    <DropdownMenuTrigger asChild> 
+                                      <Button variant="ghost" size="icon" className="h-7 w-7" disabled={blockingStatus[url.url]}> 
+                                        <MoreVertical className="h-4 w-4" /> 
+                                      </Button> 
                                     </DropdownMenuTrigger>
                                     <DropdownMenuContent align="end">
-                                      <DropdownMenuItem onClick={() => handleToggleBlock(url)}>
-                                        {url.isBlocked ? (
-                                          <>
-                                            <Check className="h-4 w-4 mr-2" />
-                                            Unblock
-                                          </>
-                                        ) : (
-                                          <>
-                                            <Ban className="h-4 w-4 mr-2" />
-                                            Block
-                                          </>
-                                        )}
-                                      </DropdownMenuItem>
+                                      <DropdownMenuItem onClick={() => handleToggleBlock(url)} disabled={blockingStatus[url.url]}>
+                                          {blockingStatus[url.url] ? 
+                                          <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : (
+                                            url.isBlocked ? <div><Check className="h-4 w-4 mr-2" />Unblock</div> : <div><Ban className="h-4 w-4 mr-2" />Block</div>)}
+                                       </DropdownMenuItem>
+                                      {/* Add other actions */}
                                     </DropdownMenuContent>
                                   </DropdownMenu>
                                 </div>
@@ -619,8 +528,8 @@ const URLs = () => {
             </Tabs>
           </div>
         </main>
-      </div>
-      
+
+        
       {/* Add New URL Dialog */}
       <Dialog open={newURLDialogOpen} onOpenChange={setNewURLDialogOpen}>
         <DialogContent className="sm:max-w-[500px]">
@@ -702,6 +611,8 @@ const URLs = () => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      </div>
     </div>
   );
 };

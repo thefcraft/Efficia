@@ -20,7 +20,7 @@ class DataBase_Api:
     def __init__(self, url: str, check_server_status: bool = True):
         self.url = url.removesuffix('/')
         if check_server_status:
-            resp = requests.get(f"{self.url}/api/")
+            resp = requests.get(f"{self.url}/api/server_init_check")
             assert resp.ok
     def insert_app(self, app: IApp):
         resp = requests.post(f"{self.url}/api/apps/", json={

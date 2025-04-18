@@ -2,7 +2,7 @@ import { ImgHTMLAttributes, useState } from "react";
 
 // Define the props interface to include all img props and src, fallbackSrc
 interface ImageWithFallbackProps extends ImgHTMLAttributes<HTMLImageElement> {
-  src: string;
+  src?: string;
   fallbackSrc: string;
 }
 
@@ -15,7 +15,7 @@ export function ImageWithFallback({
 
   return (
     <img
-      src={isError ? fallbackSrc : src}
+      src={isError ? fallbackSrc : (src || fallbackSrc)}
       onError={() => setIsError(true)}
       {...rest}
     />

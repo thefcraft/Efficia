@@ -1,4 +1,4 @@
-from typing import Optional, Dict, List
+from typing import Optional, Dict, List, Union
 from pydantic import BaseModel
 from datetime import datetime, time
 
@@ -202,3 +202,74 @@ class Category(CategoryBase):
 class AppCategory(BaseModel):
     AppId: str
     Category: Optional[str] = None
+    
+    
+
+# --- Request Models for Updates ---
+
+class UpdateCategoryRequest(BaseModel):
+    # Add fields you want to be updatable, e.g., description
+    description: Optional[str] = None
+    blockId: Optional[int] = None # Allow assigning/unassigning block
+
+class BlockUpdateRequest(BaseModel):
+    # True to block (assign a default block ID), False to unblock (set BlockId to NULL)
+    block: bool
+
+class TodoUpdateRequest(BaseModel):
+    title: Optional[str] = None
+    duedate: Optional[datetime] = None
+    completed: Optional[bool] = None
+    # Add GoalId if needed
+
+# --- Response Models ---
+
+class SimpleSuccessResponse(BaseModel):
+    success: bool
+    message: Optional[str] = None
+
+class CategoryDetailResponse(Category): # Reuse existing Category model
+    # Add associated apps/urls if needed, or fetch separately
+    apps: Optional[List[AppResponse]] = None # Example: Fetching items too
+    urls: Optional[List[BaseUrlResponse]] = None # Example: Fetching items too
+
+# Model for assigning category to URL
+class UrlCategory(BaseModel):
+    baseURL: str
+    Category: Optional[str] = None
+
+
+# --- Notes Models ---
+
+class NoteBase(BaseModel):
+    title: str
+    content: Optional[str] = None
+    GoalId: Optional[int] = None
+    tags: Optional[List[str]] = [] # List of tag strings for creation/update
+
+class NoteCreate(NoteBase):
+    pass
+
+class NoteUpdate(BaseModel): # Allow partial updates
+    title: Optional[str] = None
+    content: Optional[str] = None
+    GoalId: Optional[int] = None
+    tags: Optional[List[str]] = None # Send the full list of desired tags
+
+class NoteResponse(NoteBase):
+    note_id: int
+    Timestamp: datetime
+    goalName: Optional[str] = None # Add goal name if joined
+    # tags will be fetched and added separately in the response construction
+
+
+class TodoToggleResponse(BaseModel):
+    todo_id: int
+    completed: bool
+
+class DeleteResponse(BaseModel):
+    success: bool
+    id: Union[int, str]
+    message: str
+
+
