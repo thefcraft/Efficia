@@ -1,13 +1,13 @@
 # Efficia - AI-Powered Productivity Tracker
 
-# BTC (Behind The Code)
-https://dbms-seven-gamma.vercel.app/
-
 Efficia is a comprehensive productivity application designed for Windows users. It helps track computer activity, minimize distractions through smart blocking, manage tasks and goals, take notes, and leverage AI for insights and assistance via a chatbot interface.
 
 This project aims to provide a robust system for monitoring user activity and offering tools to enhance focus and efficiency. It integrates database management, background services, machine learning models, and a web-based frontend for user interaction and data visualization.
 
 This project particularly demonstrates database design for activity logging, hierarchical data storage (chatbots, todos), and relational data modeling for productivity features.
+
+# BTC (Behind The Code)
+https://dbms-seven-gamma.vercel.app/
 
 ## TODO
 - [ ] REMOVE API KEYS
