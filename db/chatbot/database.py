@@ -393,6 +393,20 @@ class DataBase:
         assert chat is not None, "Chat_id is Wrong, or maybe something went wrong"
         return chat
     
+    def delete_chat_info(self, chat_id: int, commit: bool = True):
+        self.cursor.execute("""--sql
+            DELETE FROM Messages WHERE ChatId = ?
+        """, (
+            chat_id, 
+        ))
+        self.cursor.execute("""--sql
+            DELETE FROM Chats WHERE ChatId = ?
+        """, (
+            chat_id, 
+        ))
+        
+        if commit: self.conn.commit()
+    
     def get_chat_messages(self, chat_id: int) -> List[models.IFetchMessage]:
         self.cursor.execute("""--sql
             SELECT MessageId, ChatId, content, message_by, message_model, message_rating, level, parent_id, siblings, position, childs, is_active, Timestamp

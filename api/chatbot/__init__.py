@@ -228,6 +228,17 @@ async def get_chat(chatId: str):
             "messages": messages
         }
 
+@app.delete("/chat/{chatId}", response_model=models.DeleteResponse)
+async def delete_chat(chatId: str):    
+    if chatId == '':
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="chatId was not given")
+    try:
+        database.delete_chat_info(chat_id=chatId, commit=True)
+    except AssertionError:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="chat Not found")
+    return models.DeleteResponse(success=True, id=chatId, message="Chat deleted successfully.")
+
+
 @app.post("/chat/{chatId}/branch_picker")
 async def branch_picker(chatId: str, request: BranchPickerRequest):
     if chatId == '':

@@ -274,13 +274,9 @@ export function SideNavigation() {
 
   const handleDelete = (id: string) => {
     console.log(`Deleting conversation ${id}`);
-    
-    setConversations(prev => {
-      return {
-        yesterday: prev.yesterday.filter(conv => conv.id !== id),
-        previous: prev.previous.filter(conv => conv.id !== id)
-      };
-    });
+    api.delete(`/chat/${id}`).then((resp) => {
+      window.location.href = `/chat`;
+    })
   };
   
   return (
