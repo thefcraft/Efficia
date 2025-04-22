@@ -1,3 +1,5 @@
+import os; os.environ["GROQ_API_KEY"] = "None" # to handle DataBase_Api logic
+
 from db import get_database_Api as get_database, DataBase_Api as DataBase, logger
 from db.models import IUrl, IApp, IActivityEntry
 from .background_service_helper import App, SleepError

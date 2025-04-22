@@ -6,6 +6,7 @@ from typing import List
 from pystray import Icon, MenuItem, Menu
 from PIL import Image, ImageDraw
 import msvcrt
+import logging
 
 import os
 if getattr(sys, 'frozen', False):
@@ -15,6 +16,26 @@ else:
 basedir = os.path.abspath(basedir)    
 if basedir.endswith('dist'):
     basedir = os.path.abspath(os.path.join(basedir, '..'))
+
+# Set up basic logging to a file
+log_path = os.path.join(basedir, 'dist', 'log.log')
+logging.basicConfig(
+    filename=log_path,
+    level=logging.ERROR,
+    format='%(asctime)s [%(levelname)s] %(message)s',
+    datefmt='%Y-%m-%d %H:%M:%S'
+)
+
+# Log unhandled exceptions
+def handle_exception(exc_type, exc_value, exc_traceback):
+    if issubclass(exc_type, KeyboardInterrupt):
+        # Allow keyboard interrupt to exit cleanly
+        sys.__excepthook__(exc_type, exc_value, exc_traceback)
+        return
+    logging.error("Uncaught exception", exc_info=(exc_type, exc_value, exc_traceback))
+
+sys.excepthook = handle_exception
+
 
 _lock_handle = None
 def is_already_running():
