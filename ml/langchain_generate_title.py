@@ -2,9 +2,10 @@ from pydantic.v1 import BaseModel, Field
 from langchain_groq import ChatGroq
 from langchain.prompts import PromptTemplate
 from langchain.chains.llm import LLMChain
+import os
 
 model = ChatGroq(
-    api_key="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",
+    api_key=os.environ["GROQ_API_KEY"],
     model="llama-3.3-70b-versatile"
 )
 

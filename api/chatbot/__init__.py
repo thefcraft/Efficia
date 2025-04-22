@@ -20,14 +20,12 @@ from ml.langchain_generate_title import generate_title
 
 database = get_database()
 
-os.environ["GROQ_API_KEY"] = "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"
-
 # TODO/BUG/ERROR: [-15] may give some error on the chats whose depth is more then 15 so i have to see the code again and coprate offset there
 # DUE TO load more feature which i am thing to add in the chats when scroll above 
 
 groq_client = AsyncOpenAI(
     base_url="https://api.groq.com/openai/v1",
-    api_key=os.getenv("GROQ_API_KEY")
+    api_key=os.environ["GROQ_API_KEY"]
 )
 
 app = APIRouter(prefix='/chatbot')

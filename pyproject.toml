@@ -29,6 +29,8 @@ dependencies = [
 [tool.uv]
 dev-dependencies = [
     "mypy>=1.15.0",
+    "pyinstaller>=6.13.0",
+    "pystray>=0.19.5",
     "types-beautifulsoup4>=4.12.0.20250204",
     "types-psutil>=7.0.0.20250218",
     "types-pywin32>=308.0.0.20250128",
