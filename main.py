@@ -52,15 +52,19 @@ class BackgroundProcessManager:
         """Terminate all running background processes and their children."""
         print("Stopping all background processes...")
         for proc in self.processes:
-            try:
-                # On Windows, send CTRL_BREAK to kill group
-                proc.send_signal(signal.CTRL_BREAK_EVENT)
-                proc.wait(timeout=5)
-            except Exception:
-                # Fallback to taskkill to ensure tree is killed
-                subprocess.call(["taskkill", "/F", "/T", "/PID", str(proc.pid)])
+            subprocess.call(
+                ["taskkill", "/F", "/T", "/PID", str(proc.pid)],
+                creationflags=subprocess.CREATE_NO_WINDOW
+            )
+            # try:
+            #     # On Windows, send CTRL_BREAK to kill group
+            #     proc.send_signal(signal.CTRL_BREAK_EVENT)
+            #     proc.wait(timeout=5)
+            # except Exception:
+            #     subprocess.call(["taskkill", "/F", "/T", "/PID", str(proc.pid)])
         self.processes.clear()
         print("All background processes stopped.")
+        sys.exit(0)
 
     def cleanup(self, signum=None, frame=None):
         """Cleanup processes on interrupt or exit."""
